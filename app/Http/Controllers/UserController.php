@@ -54,50 +54,20 @@ class UserController extends Controller
     @author : Yothin Sisaitham 66160088
     @create date : 04/04/2568
     --}} */
-    public function delete_user(Request $req){
+    public function delete_user(Request $req)
+{
     // ตรวจสอบว่ามี ID ถูกส่งมาหรือไม่
-    if ($req->has('id')) {
-        $ids = $req->input('id'); // รับค่า ID
+    if ($req->has('ids')) {
+        $ids = $req->input('ids'); // รับค่า array ของ ID ที่จะลบ
 
-        // เช็คว่าเป็น array หรือไม่ ** checkbox ที่ให้กดได้หลายคน
-        if (is_array($ids)) {
-            // ลบแบบ batch ในกรณีที่มีหลาย ID
-            $chunkSize = 500;  // กำหนดขนาด batch ที่ต้องการ
-            foreach (array_chunk($ids, $chunkSize) as $chunk) {
-                User::whereIn('id', $chunk)->delete();
-            }
-        } else {
-            // ลบผู้ใช้คนเดียว
-            $muser = User::find($ids);
-            if ($muser) {
-                $muser->delete();
-            } else {
-                return response()->noContent(); // ถ้าไม่พบผู้ใช้
-            }
-        }
-        // เมื่อการลบเสร็จสิ้นให้ redirect ไปที่หน้ารายการผู้ใช้
-        return redirect('/manageUser'); // ใช้เส้นทางที่เหมาะสม
+        // ลบผู้ใช้หลายคน
+        User::whereIn('id', $ids)->delete();
+
+        return redirect('/manageUser')->with('success', 'ลบผู้ใช้สำเร็จ');
     }
 
     // ถ้าไม่มี ID → แสดงรายการผู้ใช้ทั้งหมด
     $users = User::all();
     return view('manageUser', compact('users'));
     }
-    /*
-    // --------------- Not Use ---------------
-    // Ver.1 - เลือกหลายรายการไม่ได้
-
-     function delete_user(Request $req){
-    if ($req->has('id')) {
-        $muser = User::find($req->id); // ถ้าค้นหาด้วยค่า ID มา → ลบผู้ใช้นั้น
-        if ($muser) {
-            $muser->delete();
-            return redirect('/manage-user'); // กลับไปหน้ารายการปกติ
-        }
-        return response()->noContent(); // ถ้าไม่เจอ ID
-    }
-    // ถ้าไม่มี ID → แสดงรายการผู้ใช้ทั้งหมด
-    $users = User::all();
-    return view('manage-user', compact('users'));
-    } */
 }
