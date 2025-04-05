@@ -29,7 +29,7 @@ class UserController extends Controller
         $user = User::find($id);
         $data = $user;
         $allUser = User::all();
-        return view('edit', ['users' => $data], compact('allUser'));
+        return view('editUser', ['users' => $data], compact('allUser'));
     }
 
     function edit_action(Request $req)
@@ -41,7 +41,7 @@ class UserController extends Controller
         $muser->us_head = $req->head;
         $muser->us_email = $req->email;
         $muser->save();
-        return redirect('/manage-user');
+        return redirect()->route('manage.user');
     }
 
     function add_user()
@@ -54,20 +54,13 @@ class UserController extends Controller
     @author : Yothin Sisaitham 66160088
     @create date : 04/04/2568
     --}} */
-    public function delete_user(Request $req)
-{
-    // ตรวจสอบว่ามี ID ถูกส่งมาหรือไม่
-    if ($req->has('ids')) {
-        $ids = $req->input('ids'); // รับค่า array ของ ID ที่จะลบ
-
-        // ลบผู้ใช้หลายคน
-        User::whereIn('id', $ids)->delete();
-
-        return redirect('/manageUser')->with('success', 'ลบผู้ใช้สำเร็จ');
+    public function delete_user(Request $req){
+    if ($req->has('ids')) { // เช็คว่ามี ids หรือไม่
+        User::whereIn('us_id', $req->ids)->delete(); // ใช้ whereIn เพื่อลบหลายรายการพร้อมกัน
+    } else if ($req->has('id')) { // ถ้ามี id เดียว
+        User::where('us_id', $req->id)->delete(); // ถ้ามี id เดียวให้ลบรายการนั้น
     }
 
-    // ถ้าไม่มี ID → แสดงรายการผู้ใช้ทั้งหมด
-    $users = User::all();
-    return view('manageUser', compact('users'));
+    return redirect()->route('manage.user');
     }
 }
