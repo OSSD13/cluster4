@@ -10,8 +10,7 @@
     <div class="pt-16 bg-white-100 w-full">
         {{-- ปุ่มย้อนกลับและหัวข้อ --}}
         <div class="mb-4 px-4">
-            <a href="{{ route('manage.user') }}"
-                class="text-white border-[#4D55A0] text-2xl font-extrabold px-4 py-3 rounded-2xl flex items-center w-full"
+            <a class="text-white border-[#4D55A0] text-2xl font-extrabold px-4 py-3 rounded-2xl flex items-center w-full"
                 style="background-color: #4D55A0;">
                 จัดการบัญชีผู้ใช้
             </a>
@@ -34,9 +33,10 @@
 
         {{-- รายชื่อบัญชี --}}
         <div id="user-list px-4">
-            <div class="bg-white mt-4 px-3 rounded-lg">
-                <div class="flex items-center justify-between bg-gray-200 rounded-lg py-2"
+            <div class="bg-white mt-4 px-4 rounded-lg">
+                <div class="flex items-center justify-between bg-gray-200 rounded-2xl px-2 py-3"
                     style="background-color: #f0f0f0;">
+
                     <div class="flex items-center pl-2">
                         <input type="checkbox" id="selectAll" class="mr-2 w-6 h-6" onclick="toggleAllCheckboxes()">
                         <span class="text-gray-700">เลือกทั้งหมด</span>
