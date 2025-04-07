@@ -1,0 +1,101 @@
+body {
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scrollbar-ios {
+    -webkit-overflow-scrolling: touch;
+}
+
+.scroll-container::after {
+    content: "";
+    display: block;
+    height: 80px;
+}
+
+.swal2-confirm-custom {
+    background-color: #4D55A0;
+    color: white;
+    border: 0.5px solid transparent;
+    padding: 8px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+.swal2-success-custom {
+    background-color: #4D55A0;
+    color: white;
+    border: 1px solid transparent;
+    padding: 8px 24px;
+    margin: 0 !important;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+.swal2-delete-custom {
+    background-color: #DE3E3E;
+    color: white;
+    border: 1px solid transparent;
+    padding: 8px 24px;
+    margin: 0 !important;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+    margin-left: 8px;
+}
+
+.swal2-cancel-custom {
+    background-color: white;
+    color: black;
+    border: 1px solid black;
+    padding: 8px 24px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.swal2-title.no-padding-title {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.swal2-actions.swal2-actions-gap {
+    gap: 20px;
+    justify-content: center;
+}
+
+#bottomDrawer.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#drawerContent.fullscreen {
+    height: 100vh !important;
+    border-radius: 0 !important;
+}
+
+#drawerContent.halfscreen {
+    height: 35vh !important;
+}
+
+.pb-safe {
+    padding-bottom: 350px;
+}
+
+.pb-normal {
+    padding-bottom: 60px;
+}
