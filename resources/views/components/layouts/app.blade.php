@@ -62,7 +62,7 @@
 
     {{ $slot }}
 
-    @livewireScripts
+    <script src="{{ asset('vendor/livewire/livewire.js') }}"></script>
 
 
 
