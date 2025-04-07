@@ -11,7 +11,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>My Map</title>
-    <link rel="icon" type="image/png" href="/public/assets/image/logo-mymap.png">
+    <link rel="icon" type="image/png" href="public/assets/image/logo-mymap.png">
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -52,7 +52,7 @@
         src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dist/jquery.Thailand.min.js"></script>
 
     {{-- Import CSS form --}}
-    <link rel="stylesheet" href="/resources/css/style.css">
+    <link rel="stylesheet" href="resources/css/style.css">
 
     <title>{{ $title ?? 'Page Title' }}</title>
 </head>

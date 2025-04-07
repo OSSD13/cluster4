@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <title>My Map</title>
-    <link rel="icon" type="image/png" href="/public/assets/image/logo-mymap.png">
+    <link rel="icon" type="image/png" href="public/assets/image/logo-mymap.png">
 
     <!-- Icon FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
@@ -39,7 +39,7 @@
 
 
     {{-- Import CSS form --}}
-    <link rel="stylesheet" href="/resources/css/style.css">
+    <link rel="stylesheet" href="resources/css/style.css">
 
     @yield('styles')
 </head>
