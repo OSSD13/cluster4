@@ -9,9 +9,9 @@
 
     {{-- จัดอันดับ --}}
     <div class="pt-16 bg-white-100 w-full">
-        <div class="bg-white rounded-2xl shadow m-3 pb-4">
+        <div class="bg-white rounded-2xl shadow border m-3 pb-4">
             <div class="flex flex-row">
-                <h3 id="rankTitle" class="text-sm font-bold mt-1 p-4">สาขาที่ทำยอดขายดีที่สุด</h3>
+                <h3 id="rankTitle" class="font-semibold text-lg mt-1 p-4">สาขาที่ทำยอดขายดีที่สุด</h3>
                 <button id="switchRankButton"
                     class="text-sm font-bold m-3 p-2 ml-auto border border-[#CAC4D0] rounded-lg border-[0.5px]"
                     onclick="switchRank()">
@@ -24,7 +24,7 @@
             <div id="branchRank">
                 @foreach ($topBranch as $index => $alluser)
                     <div
-                        class="p-4 {{ $index == 0 ? 'bg-[#4D55A0] text-white w-full shadow-[0px_4px_5px_rgba(0,0,0,1)]' : 'bg-white border border-[#CAC4D0] rounded-2xl mx-4 shadow-[0px_4px_5px_rgba(0,0,0,0.2)]' }}  mb-4 pb-2 flex items-center min-h-[140px]">
+                        class="p-4 {{ $index == 0 ? 'bg-[#4D55A0] text-white w-full shadow-[0px_3px_5px_rgba(0,0,0,1)]' : 'bg-white border border-[#CAC4D0] rounded-2xl mx-4 shadow-[0px_4px_5px_rgba(0,0,0,0.2)]' }}  mb-4 pb-2 flex items-center min-h-[140px]">
                         <div class="flex flex-col">
                             <h2 class="text-lg font-bold">สาขาที่ {{ $alluser->br_id }}</h2>
                             <div class="flex items-center my-2">
@@ -81,7 +81,7 @@
             <div id="userRank" style="display: none;">
                 @foreach ($topUsers as $index => $topUser)
                     <div
-                        class="p-4 {{ $index == 0 ? 'bg-[#4D55A0] text-white w-full shadow-[0px_4px_5px_rgba(0,0,0,1)]' : 'bg-white border border-[#CAC4D0] rounded-lg mx-4 shadow-[0px_4px_5px_rgba(0,0,0,0.2)]' }}  mb-4 pb-2 flex items-center min-h-[140px]">
+                        class="p-4 {{ $index == 0 ? 'bg-[#4D55A0] text-white w-full shadow-[0px_3px_5px_rgba(0,0,0,1)]' : 'bg-white border border-[#CAC4D0] rounded-lg mx-4 shadow-[0px_4px_5px_rgba(0,0,0,0.2)]' }}  mb-4 pb-2 flex items-center min-h-[140px]">
                         <img src="{{ $topUser->us_image }}" class="w-12 h-12 rounded-full border-2 border-white"
                             alt="user">
                         <div class="ml-4">
@@ -181,43 +181,13 @@
             </div>
         </div> --}}
 
-
-        {{-- wave --}}
-        {{-- EmployeeGrowthRate --}}
-        {{-- การ์ดแสดงจำนวนพนักงาน --}}
-        <div class="bg-white border border-gray-200 rounded-2xl m-3 p-5 shadow">
-            <p class="font-semibold text-lg mb-3">จำนวนพนักงานทั้งหมด</p>
-            <div class="flex justify-between items-center mb-3">
-                <h2 class="text-2xl font-bold text-gray-900">{{ $totalEmployees }} คน</h2>
-                <i class="fa-solid fa-users text-indigo-600 text-2xl"></i>
-            </div>
-            <hr class="my-3">
-            <p class="text-base text-gray-700"> Sales <span
-                    class="float-right text-indigo-500 font-medium">{{ $salesCount }} คน</span></p>
-            <hr class="my-3">
-            <p class="text-base text-gray-700"> Sales Supervisor <span
-                    class="float-right text-indigo-500 font-medium">{{ $supervisorCount }} คน</span></p>
-            <hr class="my-3">
-            <p class="text-base text-gray-700"> CEO <span
-                    class="float-right text-indigo-500 font-medium">{{ $ceoCount }} คน</span></p>
-        </div>
-
-        {{-- การ์ดกราฟแสดงการเติบโต --}}
-        <div class="bg-white border border-gray-200 rounded-2xl m-3 p-5 shadow">
-            <p class="font-semibold text-lg mb-4">อัตราการเติบโตของพนักงานในปีนี้</p>
-            <div class="w-full">
-                <canvas id="growthChart"></canvas>
-            </div>
-        </div>
-
-
         {{-- Mork --}}
         {{-- กล่องข้อมูลสรุป --}}
         <div class="bg-white border border-gray-200 rounded-2xl m-3 p-5 mb-2 shadow">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500">จำนวนสาขาทั้งหมด</p>
-                    <p class="text-3xl font-bold">{{ number_format($totalBranches) }} สาขา</p>
+                    <p class="font-semibold text-gray-500 text-lg">จำนวนสาขาทั้งหมด</p>
+                    <p class="text-3xl font-bold py-1">{{ number_format($totalBranches) }} สาขา</p>
                     <p class="text-green-600 text-sm">จำนวนสาขาเพิ่มขึ้นเฉลี่ย {{ $growthPercentage }}%</p>
                 </div>
                 <div class="p-4 rounded-full">
@@ -231,6 +201,34 @@
             <p class="font-semibold text-lg mb-4">อัตราการเติบโตของสาขาภายในปีนี้</p>
             <div class="w-full">
                 <canvas id="branchGrowthChart"></canvas>
+            </div>
+        </div>
+
+        {{-- wave --}}
+        {{-- EmployeeGrowthRate --}}
+        {{-- การ์ดแสดงจำนวนพนักงาน --}}
+        <div class="bg-white border border-gray-200 rounded-2xl m-3 p-5 shadow">
+            <p class="font-semibold text-gray-500 text-lg mb-3">จำนวนพนักงานทั้งหมด</p>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-3xl font-bold text-gray-900">{{ $totalEmployees }} คน</h2>
+                <i class="fa-solid fa-users text-[#4D55A0] fa-2xl"></i>
+            </div>
+            <hr class="my-3">
+            <p class="text-base text-gray-700"> Sales <span class="float-right text-indigo-500 ">{{ $salesCount }}
+                    คน</span></p>
+            <hr class="my-3">
+            <p class="text-base text-gray-700"> Sales Supervisor <span
+                    class="float-right text-indigo-500 ">{{ $supervisorCount }} คน</span></p>
+            <hr class="my-3">
+            <p class="text-base text-gray-700"> CEO <span class="float-right text-indigo-500 ">{{ $ceoCount }}
+                    คน</span></p>
+        </div>
+
+        {{-- การ์ดกราฟแสดงการเติบโต --}}
+        <div class="bg-white border border-gray-200 rounded-2xl m-3 p-5 shadow">
+            <p class="font-semibold text-lg mb-4">อัตราการเติบโตของพนักงานในปีนี้</p>
+            <div class="w-full">
+                <canvas id="growthChart"></canvas>
             </div>
         </div>
     </div>

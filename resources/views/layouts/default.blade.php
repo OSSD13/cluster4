@@ -49,15 +49,21 @@
     <nav class="fixed top-0 left-0 w-full bg-white shadow-md z-10 flex justify-between items-center px-4 py-2">
         <!-- Hamburger Menu Button -->
         <button id="menuToggle" class="text-gray-700">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <i class="fa-solid fa-bars fa-xl"></i>
         </button>
 
-        <!-- Profile Icon -->
-        <div class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-400">
-            <i class="fa-regular fa-user text-2xl"></i>
+        <!-- ชื่อผู้ใช้ -->
+        <div class="ml-auto flex items-center space-x-2">
+            <span class="text-md font-sm text-gray-500">สวัสดี! {{ Auth::user()->us_fname ?? 'ผู้ใช้' }}</span>
+
+            <!-- ไอคอนโปรไฟล์ -->
+            <button class="w-9 h-9 flex items-center justify-center border rounded-full">
+                @if (!empty(Auth::user()->us_image))
+                    <img src="{{ Auth::user()->us_image }}" alt="Profile" class="w-9 h-9 rounded-full">
+                @else
+                    <i class="fa-solid fa-user text-gray-600"></i>
+                @endif
+            </button>
         </div>
     </nav>
 

@@ -9,10 +9,8 @@
     <div id="sidebar"
         class="fixed top-0 left-0 h-full w-64 bg-white shadow-lg transform -translate-x-full transition-transform z-50">
         <!-- Close Button -->
-        <button id="closeMenu" class="absolute top-4 right-4 text-gray-600">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+        <button id="closeMenu" class="absolute top-2 right-4 ">
+            <i class="fa-solid fa-x"></i>
         </button>
 
         <!-- Sidebar Menu -->
@@ -62,7 +60,10 @@
             <hr class="my-2">
 
             <li class="px-4 py-3 hover:bg-gray-200 flex items-center text-lg font-medium">
-                <i class="fa-solid fa-right-from-bracket mr-3" style="color: #595959;"></i> ออกจากระบบ
+                <a href="{{ route('logout') }}">
+                    <i class="fa-solid fa-right-from-bracket mr-3" style="color: #595959;"></i> ออกจากระบบ
+                </a>
+
             </li>
         </ul>
     </div>

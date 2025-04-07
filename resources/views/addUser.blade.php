@@ -2,13 +2,12 @@
 @section('content')
     <div class="pt-16 h-screen mx-auto p-4 bg-white min-h-screen w-full">
 
-        <div class="mb-4 ">
-            <a href="{{ route('manage.user') }}"
-                class="text-white border-[#4D55A0] text-2xl font-extrabold py-3  rounded-2xl flex items-center w-full"
+        <div class="mb-4">
+            <div class="text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
                 style="background-color: #4D55A0;">
-                <i class="fa-solid fa-arrow-left mx-3 fa-l"></i>
+                <a href="{{ route('manage.user') }}"><i class="fa-solid fa-arrow-left mx-3 fa-l"></i></a>
                 เพิ่มบัญชีผู้ใช้
-            </a>
+            </div>
         </div>
 
         <div class="flex items-center justify-center h-auto bg-gray-100 ">

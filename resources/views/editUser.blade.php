@@ -9,12 +9,11 @@
     <div class="pt-16 bg-white-100 w-full mx-auto">
         {{-- ปุ่มย้อนกลับและหัวข้อ --}}
         <div class="mb-4 px-4">
-            <a href="{{ route('manage.user') }}"
-                class="text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
+            <div class="text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
                 style="background-color: #4D55A0;">
-                <i class="fa-solid fa-arrow-left mx-3 fa-l"></i>
+                <a href="{{ route('manage.user') }}"><i class="fa-solid fa-arrow-left mx-3 fa-l"></i></a>
                 แก้ไขข้อมูล
-            </a>
+            </div>
         </div>
         {{-- ส่วนแสดงรุูปภาพ --}}
         <div class="flex space-x-2 mb-4">

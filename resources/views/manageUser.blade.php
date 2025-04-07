@@ -10,11 +10,10 @@
     <div class="pt-16 bg-white-100 w-full">
         {{-- ปุ่มย้อนกลับและหัวข้อ --}}
         <div class="mb-4 px-4">
-            <a href="{{ route('manage.user') }}"
-                class="text-white border-[#4D55A0] text-2xl font-extrabold px-4 py-3 rounded-2xl flex items-center w-full"
+            <div class="text-white border-[#4D55A0] text-2xl font-extrabold px-4 py-3 rounded-2xl flex items-center w-full"
                 style="background-color: #4D55A0;">
                 จัดการบัญชีผู้ใช้
-            </a>
+            </div>
         </div>
 
         {{-- ช่องค้นหา + ปุ่มเพิ่มบัญชี --}}
@@ -28,13 +27,13 @@
                 style="background-color: #4D55A0;">เพิ่มบัญชี</a>
         </div>
         {{-- หมวดหมู่บัญชี --}}
-        <div class="bg-white px-3 rounded-lg px-4">
+        <div class="bg-white rounded-lg px-4">
             <p class="font-semibold text-2xl">บัญชีทั้งหมด {{ count($users) }}</p>
         </div>
 
         {{-- รายชื่อบัญชี --}}
         <div id="user-list px-4">
-            <div class="bg-white mt-4 px-3 rounded-lg">
+            <div class="bg-white mt-4 px-4 rounded-lg">
                 <div class="flex items-center justify-between bg-gray-200 rounded-lg py-2"
                     style="background-color: #f0f0f0;">
                     <div class="flex items-center pl-2">
