@@ -29,4 +29,6 @@ class Order extends Model
     public function user(){
         return $this->belongsTo(User::class, 'od_us_id', 'us_id');
     }
+
+    
 }

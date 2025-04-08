@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\DashboardController;
 use App\Http\Middleware\CheckGoogleLogin;
+use App\Models\Branch;
 use PHPUnit\Runner\HookMethod;
 
 // @author : Pakkapon Chomchoey 66160080
@@ -26,9 +27,9 @@ Route::get('/cluster4/logout', function () {
     return Redirect('/login');
 })->name('logout');
 
-Route::get('auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('redirect.google');
+Route::get('/cluster4/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('redirect.google');
 
-Route::get('auth/google/callback', [GoogleLoginController::class, 'googleCallback'])->name('callback.google');
+Route::get('/cluster4/auth/google/callback', [GoogleLoginController::class, 'googleCallback'])->name('callback.google');
 
 
 Route::get('/', [UserController::class, 'index']);
@@ -56,6 +57,10 @@ Route::get('/cluster4/map', MapLocation::class)->name('map');
 
 // Aninthita 66160381
 Route::get('/cluster4/order-detail/{br_id}', [OrderController::class, 'order_detail'])->name('order.detail');
+
+Route::get('/cluster4/branch-detail/{br_id}', [BranchController::class, 'branch_detail'])->name('branchDetail');
+Route::get('/cluster4/edit-branch-detail/{br_id},{br_mount}', [BranchController::class, 'branch_detail'])->name('branchDetail');
+
 
 Route::get('/cluster4/order', [OrderController::class, 'index'])->name('order');
 
