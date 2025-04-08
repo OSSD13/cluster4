@@ -151,17 +151,18 @@
                 <div>
                     <p class="text-gray-500 text-sm">ยอดขายทั้งหมดในปีนี้</p>
                     <h2 class="text-3xl font-bold">{{ number_format($totalSales) }} <span class="text-lg">ชิ้น</span>
-                        <span class="text-{{ $growthPercentage < 0 ? 'red' : ($growthPercentage > 0 ? 'green' : 'gray') }}-500 text-sm font-semibold">
-                            @if ($growthPercentage < 0)
-                                - {{ number_format($growthPercentage) }}%
-                            @elseif ($growthPercentage > 0)
-                                + {{ number_format($growthPercentage) }}%
+                        <span
+                            class="text-{{ $percent < 0 ? 'red' : ($percent > 0 ? 'green' : 'gray') }}-500 text-sm font-semibold">
+                            @if ($percent < 0)
+                                - {{ number_format($percent) }}%
+                            @elseif ($percent > 0)
+                                + {{ number_format($percent) }}%
                             @else
-                                {{ number_format($growthPercentage) }}%
+                                {{ number_format($percent) }}%
                             @endif
                         </span>
                     </h2>
-                    <p class="text-gray-400 text-xs">ค่าเฉลี่ยรายเดือนอยู่ที่ <span
+                    <p class="text-gray-400 text-xs">ค่าเฉลี่ยยอดขายอยู่ที่ <span
                             class="font-semibold">{{ number_format($averageSales) }}</span> ชิ้น</p>
                 </div>
                 <div class="pr-4">
@@ -245,7 +246,6 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-
         // allOrder Graph
         const monthlySales = @json($monthlySales);
         const monthlySalesOnly = @json(array_values($monthlySales));
@@ -267,10 +267,23 @@
 
 
         const salesChart = new Chart(ctxOrder, {
-            type: 'bar',
+
             data: {
                 labels: labels, // ชื่อเดือนที่ส่งมาจาก Controller
                 datasets: [
+
+                    {
+                        label: 'ยอดขายของสาขา',
+                        type: 'line',
+                        data: monthlySalesOnly, // ยอดขายแต่ละเดือนที่ส่งมาจาก Controller
+                        borderColor: 'rgba(rgba(0, 0, 255, 1))',
+                        backgroundColor: 'rgba(54, 79, 199, 0.8)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        tension: 0.3,
+                        spanGaps: true,
+
+                    },
                     {
                         label: 'ค่ามัธยฐาน',
                         type: 'line',
@@ -281,41 +294,31 @@
                         pointRadius: 4,
                         tension: 0.3,
                         spanGaps: true,
-                        fill: true
 
                     },
-                    {
-                        label: 'มัธยฐาน + 2SD',
-                        type: 'line',
-                        data: dataMedianPlus2SD,
-                        borderColor: 'rgba(255, 165, 0, 1)', // สีส้ม
-                        backgroundColor: 'rgba(255, 165, 0, 0.2)',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        tension: 0.3,
-                        spanGaps: true,
-                        fill: true
-                    },
-                    {
-                        label: 'มัธยฐาน - 2SD',
-                        type: 'line',
-                        data: monthlyMinus2SDRaw,
-                        borderColor: 'rgba(0, 200, 100, 1)', // สีเขียว
-                        backgroundColor: 'rgba(0, 200, 100, 0.2)',
-                        borderWidth: 2,
-                        pointRadius: 4,
-                        tension: 0.3,
-                        spanGaps: true,
-                        fill: true
-                    },
-                    {
-                        label: 'ยอดขายของสาขา',
+                    // {
+                    //     label: 'มัธยฐาน + 2SD',
+                    //     type: 'line',
+                    //     data: dataMedianPlus2SD,
+                    //     borderColor: 'rgba(255, 165, 0, 1)', // สีส้ม
+                    //     backgroundColor: 'rgba(255, 165, 0, 0.2)',
+                    //     borderWidth: 2,
+                    //     pointRadius: 4,
+                    //     tension: 0.3,
+                    //     spanGaps: true,
+                    // },
+                    // {
+                    //     label: 'มัธยฐาน - 2SD',
+                    //     type: 'line',
+                    //     data: monthlyMinus2SDRaw,
+                    //     borderColor: 'rgba(0, 200, 100, 1)', // สีเขียว
+                    //     backgroundColor: 'rgba(0, 200, 100, 0.2)',
+                    //     borderWidth: 2,
+                    //     pointRadius: 4,
+                    //     tension: 0.3,
+                    //     spanGaps: true,
+                    // },
 
-                        data: monthlySalesOnly, // ยอดขายแต่ละเดือนที่ส่งมาจาก Controller
-                        backgroundColor: 'rgba(54, 79, 199, 0.8)',
-                        borderRadius: 4,
-                        pointStyle: 'circle'
-                    },
 
                 ]
             },
@@ -344,7 +347,7 @@
                             callback: function(value) {
                                 //const allowedTicks = [1, 1000, 10000, 100000, 1000000, maxY];
                                 //if (allowedTicks.includes(value)) {
-                                    return value.toLocaleString(); // แสดงตัวเลขพร้อมคอมม่า
+                                return value.toLocaleString(); // แสดงตัวเลขพร้อมคอมม่า
                                 //}
                                 //return '';
                             }
