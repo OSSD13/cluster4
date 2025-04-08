@@ -121,6 +121,6 @@ class OrderController extends Controller{
         $order->od_us_id = $request->od_us_id;
         $order->save();
 
-        return redirect()->route('orderDetail', ['br_id' => $order->od_br_id]);
+        return redirect()->route('order.detail', ['br_id' => $order->od_br_id]); // กลับไปที่หน้ารายละเอียด
     }
 }

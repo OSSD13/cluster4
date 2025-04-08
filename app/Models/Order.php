@@ -18,6 +18,8 @@ class Order extends Model
         'od_amount',
         'od_month',
         'od_year',
+        'od_br_id',
+        'od_us_id',
     ];
 
     public function branch(){
