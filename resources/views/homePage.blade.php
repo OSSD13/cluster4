@@ -276,7 +276,7 @@
                         label: 'ยอดขายของสาขา',
                         type: 'line',
                         data: monthlySalesOnly, // ยอดขายแต่ละเดือนที่ส่งมาจาก Controller
-                        borderColor: 'rgba(rgba(0, 0, 255, 1))',
+                        borderColor: 'rgba(0, 0, 255, 1)',
                         backgroundColor: 'rgba(54, 79, 199, 0.8)',
                         borderWidth: 2,
                         pointRadius: 4,

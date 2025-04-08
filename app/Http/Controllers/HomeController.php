@@ -149,7 +149,7 @@ class HomeController extends Controller
 
                 $monthlyMedian[$month] = $median;
             } else {
-                $monthlyMedian[$month] = 1;
+                $monthlyMedian[$month] = 0;
             }
         }
 
@@ -213,7 +213,7 @@ class HomeController extends Controller
                 // ผลลัพธ์: median + 2*SD
                 $monthlyPlus2SD[$month] = $median + (2 * $sd);
             } else {
-                $monthlyPlus2SD[$month] = 1; // ไม่มีข้อมูลในเดือนนั้น
+                $monthlyPlus2SD[$month] = 0; // ไม่มีข้อมูลในเดือนนั้น
             }
         }
 
@@ -239,7 +239,7 @@ class HomeController extends Controller
                 $minus2SD = max(0, $median - 2 * $sd);
                 $monthlyMinus2SD[$month] = $minus2SD;
             } else {
-                $monthlyMinus2SD[$month] = 1; // ถ้าไม่มีข้อมูลเดือนนี้
+                $monthlyMinus2SD[$month] = 0; // ถ้าไม่มีข้อมูลเดือนนี้
             }
         }
 
