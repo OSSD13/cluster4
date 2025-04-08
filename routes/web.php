@@ -27,9 +27,9 @@ Route::get('/cluster4/logout', function () {
     return Redirect('/login');
 })->name('logout');
 
-Route::get('auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('redirect.google');
+Route::get('/cluster4/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('redirect.google');
 
-Route::get('auth/google/callback', [GoogleLoginController::class, 'googleCallback'])->name('callback.google');
+Route::get('/cluster4/auth/google/callback', [GoogleLoginController::class, 'googleCallback'])->name('callback.google');
 
 
 Route::get('/', [UserController::class, 'index']);
@@ -39,13 +39,11 @@ Route::get('/cluster4/dashboard', [DashboardController::class, 'branchGrowthRate
 
 Route::get('/cluster4/home', [HomeController::class, 'index'])->name('home');
 
-
 Route::get('/cluster4/manage-user', [UserController::class, 'index'])->name('manage.user');
 
-
 Route::get('/cluster4/add-user', [UserController::class, 'add_user'])->name('add.user');
-Route::post('/cluster4/add-user', [UserController::class, 'create'])->name('create.user');
 
+Route::post('/cluster4/add-user', [UserController::class, 'create'])->name('create.user');
 
 Route::delete('/cluster4/delete-user', [UserController::class, 'delete_user'])->name('delete.user');
 
@@ -57,8 +55,9 @@ Route::get('/cluster4/branchMyMap', [branchController::class, 'index'])->name('b
 
 Route::get('/cluster4/map', MapLocation::class)->name('map');
 
+// Aninthita 66160381
+Route::get('/cluster4/order-detail/{br_id}', [OrderController::class, 'order_detail'])->name('order.detail');
 
-Route::get('/cluster4/order-detail/{br_id}', [OrderController::class, 'order_detail'])->name('orderDetail');
 Route::get('/cluster4/branch-detail/{br_id}', [BranchController::class, 'branch_detail'])->name('branchDetail');
 Route::get('/cluster4/edit-branch-detail/{br_id},{br_mount}', [BranchController::class, 'branch_detail'])->name('branchDetail');
 
@@ -66,6 +65,11 @@ Route::get('/cluster4/edit-branch-detail/{br_id},{br_mount}', [BranchController:
 Route::get('/cluster4/order', [OrderController::class, 'index'])->name('order');
 
 Route::get('/cluster4/add-order', [OrderController::class, 'add_order']);
+
+// เรียกหน้าแก้ไขคำสั่งซื้อ
+Route::get('/cluster4/editOrder/{od_id}', [OrderController::class, 'editOrder'])->name('edit.order');
+// อัปเดตคำสั่งซื้อ
+Route::put('/cluster4/edit-order/{od_id}', [OrderController::class, 'update'])->name('update.order');
 
 Route::get('/cluster4/order-status', [OrderController::class, 'status'])->name('order.status');
 

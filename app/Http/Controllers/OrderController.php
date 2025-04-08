@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -13,10 +14,53 @@ use Illuminate\Support\Facades\DB;
 // @author : Aninthita Prasoetsang 66160381
 class OrderController extends Controller
 {
+
     private array $thaiMonths = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
     ];
+  
+  public function add_order(){
+        return view('addOrder');
+    }
+
+    public function editOrder($od_id) {
+        $label = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        $order = Order::find($od_id);
+        $order = Order::with('branch')->find($od_id);
+
+        if (!$order) {
+            return redirect()->route('edit.order', ['od_id' => $od_id]);
+        }
+        $users = User::all();
+        return view('editOrder', compact('order', 'users'));
+    }
+
+        public function update(Request $request) {
+        $validated = $request->validate([
+            'od_month' => 'required',
+        ]);
+
+        $order = Order::find($request->od_id);
+
+        if (!$order) {
+            return redirect()->route('order');
+        }
+
+        if ($request->action === 'delete') {
+            $order->delete();
+            return redirect()->route('order');
+        }
+
+        $order->od_amount = $request->od_amount;
+        $order->od_month = $request->od_month;
+        $order->od_year = $request->od_year;
+        $order->od_br_id = $request->od_br_id;
+        $order->od_us_id = $request->od_us_id;
+        $order->save();
+
+        return redirect()->route('order.detail', ['br_id' => $order->od_br_id]); // กลับไปที่หน้ารายละเอียด
+    }
 
     private array $monthMap = [
         'มกราคม' => 1, 'กุมภาพันธ์' => 2, 'มีนาคม' => 3, 'เมษายน' => 4,
