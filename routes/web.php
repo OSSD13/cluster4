@@ -70,11 +70,11 @@ Route::middleware([CheckGoogleLogin::class])->group(
 Route::get('/cluster4/order-status', [OrderController::class, 'status'])->name('order.status');
 
 Route::get('/cluster4/report/team/{id}', [SalesTeamController::class, 'detail']);
-      
-      
-      
-      
-      
+
+
+
+
+
     }
 );
 
