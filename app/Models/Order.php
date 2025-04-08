@@ -20,13 +20,11 @@ class Order extends Model
         'od_year',
     ];
 
-    public function branch()
-    {
+    public function branch(){
         return $this->belongsTo(Branch::class, 'od_br_id', 'br_id');
     }
 
-    public function user()
-    {
+    public function user(){
         return $this->belongsTo(User::class, 'od_us_id', 'us_id');
     }
 }

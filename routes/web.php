@@ -38,13 +38,11 @@ Route::get('/cluster4/dashboard', [DashboardController::class, 'branchGrowthRate
 
 Route::get('/cluster4/home', [HomeController::class, 'index'])->name('home');
 
-
 Route::get('/cluster4/manage-user', [UserController::class, 'index'])->name('manage.user');
 
-
 Route::get('/cluster4/add-user', [UserController::class, 'add_user'])->name('add.user');
-Route::post('/cluster4/add-user', [UserController::class, 'create'])->name('create.user');
 
+Route::post('/cluster4/add-user', [UserController::class, 'create'])->name('create.user');
 
 Route::delete('/cluster4/delete-user', [UserController::class, 'delete_user'])->name('delete.user');
 
@@ -59,10 +57,14 @@ Route::get('/cluster4/map', MapLocation::class)->name('map');
 // Aninthita 66160381
 Route::get('/cluster4/order-detail/{br_id}', [OrderController::class, 'order_detail']);
 
-
 Route::get('/cluster4/order', [OrderController::class, 'index'])->name('order');
 
 Route::get('/cluster4/add-order', [OrderController::class, 'add_order']);
+
+// เรียกหน้าแก้ไขคำสั่งซื้อ
+Route::get('/cluster4/editOrder/{od_id}', [OrderController::class, 'editOrder'])->name('edit.order');
+// อัปเดตคำสั่งซื้อ
+Route::put('/cluster4/edit-order/{id}', [OrderController::class, 'update'])->name('update.order');
 
 Route::get('/cluster4/order-status', [OrderController::class, 'status'])->name('order.status');
 
