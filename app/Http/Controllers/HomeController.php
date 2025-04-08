@@ -93,7 +93,7 @@ class HomeController extends Controller
         $averageSales = Order::avg('od_amount');
 
         // ดึงข้อมูลยอดขายรายเดือน
-        $salesData = Order::where('od_year', 2568) // ปีล่าสุด
+        $orderData = Order::where('od_year', 2568) // ปีล่าสุด
             ->selectRaw('od_month, SUM(od_amount) as total_sales')
             ->groupBy('od_month')
             ->orderByRaw("FIELD(od_month, 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม')")
@@ -101,7 +101,7 @@ class HomeController extends Controller
 
         // เตรียมข้อมูลยอดขายรายเดือน
         $monthlySales = [];
-        foreach ($salesData as $sale) {
+        foreach ($orderData as $sale) {
             $monthNumber = $monthMap[$sale->od_month]; // แปลงชื่อเดือนเป็นหมายเลขเดือน
             $monthlySales[$monthNumber] = $sale->total_sales;
         }

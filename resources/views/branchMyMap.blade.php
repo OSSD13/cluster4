@@ -144,7 +144,7 @@
 <script>
     // ข้อมูลกราฟ
     const labels = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
-    const salesData = [1000, 5000, 10000, 20000, 15000, 8000, 50000, 30000, 25000, 40000, 27000, 35000];
+    const orderData = [1000, 5000, 10000, 20000, 15000, 8000, 50000, 30000, 25000, 40000, 27000, 35000];
     const baseData = [2000, 7000, 15000, 12000, 18000, 11000, 25000, 20000, 18000, 21000, 19000, 22000];
 
     const ctx = document.getElementById('salesChart').getContext('2d');
@@ -155,7 +155,7 @@
             datasets: [
                 {
                     label: 'ยอดขายของสาขา',
-                    data: salesData,
+                    data: orderData,
                     backgroundColor: '#4D55A0'
                 },
                 {
@@ -184,7 +184,7 @@
     function updateChart(months) {
         let start = 12 - months;
         chart.data.labels = labels.slice(start);
-        chart.data.datasets[0].data = salesData.slice(start);
+        chart.data.datasets[0].data = orderData.slice(start);
         chart.data.datasets[1].data = baseData.slice(start);
         chart.update();
     }
