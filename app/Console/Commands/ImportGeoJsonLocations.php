@@ -6,6 +6,7 @@ use App\Models\InterestLocation;
 use App\Models\TypeLocation;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class ImportGeoJsonLocations extends Command
@@ -32,12 +33,12 @@ class ImportGeoJsonLocations extends Command
         //
         $user = User::first();
         $files = $this->argument('files');
-        dd(Storage::get($files[0]));
 
         if (empty($files)) {
-            $this->info('🔍 ไม่ได้ระบุไฟล์ → กำลังโหลดจาก storage/app/data');
-            $files = Storage::disk('local')->files('data');
-
+            $files = $files = collect(Storage::disk('geojson')->files())
+                ->filter(fn($file) => str_ends_with($file, '.geojson'))
+                ->values()
+                ->toArray();
             if (empty($files)) {
                 $this->error('❌ ไม่พบไฟล์ใด ๆ ใน data/');
                 return;
@@ -49,12 +50,12 @@ class ImportGeoJsonLocations extends Command
         }
 
         foreach ($files as $filename) {
-            if (!Storage::exists($filename)) {
+            if (!Storage::disk('geojson')->exists($filename)) {
                 $this->warn("⚠️ ไม่พบไฟล์: {$filename}");
                 continue;
             }
 
-            $json = Storage::get($filename);
+            $json = Storage::disk('geojson')->get($filename);
             $data = json_decode($json, true);
             $features = $data['features'] ?? [];
 
@@ -111,7 +112,7 @@ class ImportGeoJsonLocations extends Command
 
             $type = TypeLocation::where('tl_name', $typeDisplayName)->first();
 
-            if (! $type) {
+            if (!$type) {
                 $this->warn("⚠️ ไม่พบประเภท '{$typeDisplayName}' ในฐานข้อมูล");
                 continue;
             }
@@ -119,15 +120,22 @@ class ImportGeoJsonLocations extends Command
             foreach ($features as $f) {
                 $props = $f['properties'];
                 $coords = $f['geometry']['coordinates'];
-
-                InterestLocation::create([
-                    'il_name' => $props['name'] ?? $props['NameT'] ?? 'ไม่รู้',
-                    'il_lat' => (float) $coords[1],
-                    'il_long' => (float) $coords[0],
-                    'il_scope' => 5,
-                    'il_tl_id' => $type->tl_id,
-                    'us_id' => $user->id
-                ]);
+                try {
+                    InterestLocation::create([
+                        'il_name' => $props['name'] ?? $props['NameT'] ?? 'ไม่รู้',
+                        'il_longlat' => DB::raw("ST_GeomFromText('POINT({$coords[0]} {$coords[1]})', 4326)"),
+                        'il_scope' => 5,
+                        'il_tl_id' => $type->tl_id,
+                        'il_us_id' => $user->id,
+                        'il_address' => '-',
+                        'il_subdistrict' => '-',
+                        'il_district' => '-',
+                        'il_province' => '-',
+                        'il_postalcode' => '-',
+                    ]);
+                } catch (\Exception $e) {
+                    $this->warn("⚠️ ไม่สามารถนำเข้าข้อมูล {$props['name']} ได้: " . $e->getMessage());
+                }
             }
 
             $this->info("✅ นำเข้า {$basename} เรียบร้อย จำนวน: " . count($features));

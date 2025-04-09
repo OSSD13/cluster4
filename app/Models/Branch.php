@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -10,6 +11,7 @@ class Branch extends Model
 {
     //
     use SoftDeletes;
+    use HasFactory;
     protected $table = 'branch';
     protected $primaryKey = 'br_id';
     public $timestamps = true;
@@ -25,6 +27,7 @@ class Branch extends Model
         'br_province',
         'br_postalcode',
         'br_us_id',
+        'created_by',
     ];
 
     public function manager()

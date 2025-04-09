@@ -20,7 +20,7 @@ class CheckGoogleLogin
     public function handle(Request $request, Closure $next): Response
     {
         if (!Auth::check() || !Session::has('google_user')) {
-            return redirect('/');
+            return redirect()->route('login');
         }
         return $next($request);
     }

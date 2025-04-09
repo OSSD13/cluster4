@@ -22,6 +22,7 @@ class User extends Authenticatable
      */
 
     protected $primaryKey = 'us_id';
+
     public $timestamps = true;
     protected $fillable = [
         'us_fname',
@@ -29,7 +30,6 @@ class User extends Authenticatable
         'us_email',
         'us_role',
         'us_head',
-
     ];
 
     protected $casts = [

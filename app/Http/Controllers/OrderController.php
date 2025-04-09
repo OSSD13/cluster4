@@ -186,13 +186,9 @@ class OrderController extends Controller
 
     private function monthlyMedianOrder(int $year)
     {
-        $months = $this->thaiMonths;
-
-        $orders = DB::table('order')
-            ->select('od_month', 'od_amount')
-            ->where('od_year', $year)
-            ->whereIn('od_month', $months)
-            ->orderByRaw("FIELD(od_month, '" . implode("','", $months) . "')")
+        $o = User::join('branch as b', 'users.us_id', '=', 'b.br_us_id') // ดึงข้อมูลผู้ใช้ทั้งหมด
+            ->join('order as o', 'b.br_id', '=', 'o.od_br_id')
+            ->select('b.br_id', 'b.br_code', 'users.us_image', 'users.us_email', 'o.od_amount')
             ->get();
 
         $monthlyData = [];

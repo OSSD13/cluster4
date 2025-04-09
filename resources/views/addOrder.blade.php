@@ -59,8 +59,8 @@
     @section('scripts')
         <script>
             document.getElementById('saveButton').addEventListener('click', function() {
-                const orderAlert = '/public/alert-icon/OrderAlert.png';
-                const successAlert = '/public/alert-icon/SuccessAlert.png';
+                const orderAlert = './public/alert-icon/OrderAlert.png';
+                const successAlert = './public/alert-icon/SuccessAlert.png';
                 Swal.fire({
                     title: 'ยืนยันการเพิ่มยอดขาย',
                     imageUrl: orderAlert,

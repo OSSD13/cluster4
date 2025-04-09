@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Branch;
+use App\Models\InterestLocation;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Attributes\On;
@@ -16,6 +18,8 @@ class MapLocation extends Component
     public $center = [100.5018, 13.7563]; // Bangkok coordinates
     public $mapBoxToken;
     public $scope = 5;
+
+    public $nearbyPreview = [];
 
     protected function getListeners(): array
     {
@@ -35,6 +39,7 @@ class MapLocation extends Component
 
 
     public $geoJsonBranch;
+    public $geoJsonInterest;
 
     #[On('generateCodeBranch')]
     public function generateCodeBranch()
@@ -45,6 +50,8 @@ class MapLocation extends Component
 
     public function loadBranchLocation()
     {
+        $years = Carbon::now()->year;
+
         $user = auth()->user();
         $locations = Branch::query()
             ->when($user && $user->us_role === 'Sales', function ($query) use ($user) {
@@ -58,7 +65,11 @@ class MapLocation extends Component
                         ->orWhere('us_id', $user->us_id);
                 });
             })
-            ->with(['image', 'manager'])
+            ->with([
+                'image',
+                'manager',
+                'order'
+            ])
             ->select(
                 'br_id',
                 'br_code',
@@ -77,10 +88,45 @@ class MapLocation extends Component
             ->get();
 
         $arrayLocation = [];
+        $thaiMonths = [
+            1 => 'มกราคม',
+            2 => 'กุมภาพันธ์',
+            3 => 'มีนาคม',
+            4 => 'เมษายน',
+            5 => 'พฤษภาคม',
+            6 => 'มิถุนายน',
+            7 => 'กรกฎาคม',
+            8 => 'สิงหาคม',
+            9 => 'กันยายน',
+            10 => 'ตุลาคม',
+            11 => 'พฤศจิกายน',
+            12 => 'ธันวาคม',
+        ];
         foreach ($locations as $location) {
             $address = $location->br_address . ' ' . $location->br_subdistrict . ' ' . $location->br_district . ' ' . $location->br_province . ' ' . $location->br_postalcode;
             $images = $location->image->pluck('i_pathUrl');
             $manager = $location->manager?->us_fname . ' ' . $location->manager?->us_lname;
+
+            $monthlySales = collect(range(1, 12))->map(function ($monthNum) use ($location, $thaiMonths, $years) {
+                $orders = $location->order->filter(function ($order) use ($monthNum, $years) {
+                    $isSameYear = Carbon::parse($order->created_at)->year === $years;
+                    $isSameMonth = (int)Carbon::parse($order->created_at)->format('n') === $monthNum;
+                    return $isSameYear && $isSameMonth;
+                });
+
+                $latestOrder = $orders->sortByDesc(function ($o) {
+                    return $o->updated_at !== null && $o->updated_at != $o->created_at
+                        ? $o->updated_at
+                        : $o->created_at;
+                })->first();
+
+                return [
+                    'month' => $thaiMonths[$monthNum],
+                    'amount' => $latestOrder->od_amount ?? 0,
+                    'order_count' => $orders->count(),
+                ];
+            });
+
             $arrayLocation[] = [
                 'type' => 'Feature',
                 'geometry' => [
@@ -100,6 +146,7 @@ class MapLocation extends Component
                     'manager_image' => $location->manager?->us_image,
                     'manager_role' => $location->manager?->us_role,
                     'manager_email' => $location->manager?->us_email,
+                    'orders' => $monthlySales->toArray(),
                 ],
             ];
         }
@@ -312,6 +359,49 @@ class MapLocation extends Component
         }
     }
 
+    public function loadNearbyPreview()
+    {
+        if (!$this->long || !$this->lat) return;
+
+        $radius = $this->scope ?? 5; // กิโลเมตร
+        $radiusMeters = $radius * 1000;
+
+        $branches = Branch::selectRaw('*, ST_Distance_Sphere(POINT(?, ?), br_longlat) as distance', [$this->long, $this->lat])
+            ->whereRaw("ST_Distance_Sphere(POINT(?, ?), br_longlat) <= ?", [$this->long, $this->lat, $radiusMeters])
+            ->whereNull('deleted_at')
+            ->limit(5)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'type' => 'branch',
+                    'name' => $item->br_name,
+                    'address' => $item->br_address,
+                    'distance' => round($item->distance / 1000, 2),
+                ];
+            });
+
+        $interests = InterestLocation::selectRaw('*, ST_Distance_Sphere(POINT(?, ?), il_longlat) as distance', [$this->long, $this->lat])
+            ->whereRaw("ST_Distance_Sphere(POINT(?, ?), il_longlat) <= ?", [$this->long, $this->lat, $radiusMeters])
+            ->limit(5)
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'type' => 'interest',
+                    'name' => $item->il_name,
+                    'address' => $item->il_address,
+                    'distance' => round($item->distance / 1000, 2),
+                ];
+            });
+
+        $this->nearbyPreview = collect($branches)
+            ->merge($interests)
+            ->sortBy('distance')
+            ->take(5)
+            ->values()
+            ->toArray();
+    }
+
+
     #[On('clearEditBranchForm')]
     public function clearEditBranch()
     {
@@ -352,12 +442,14 @@ class MapLocation extends Component
     public function updateScope($scope)
     {
         $this->scope = $scope;
+        $this->loadNearbyPreview();
     }
 
     public function setLongLat($long, $lat)
     {
         $this->long = $long;
         $this->lat = $lat;
+        $this->loadNearbyPreview();
     }
 
     public function render()

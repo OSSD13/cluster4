@@ -64,12 +64,12 @@ class SearchBar extends Component
         })->toArray();
     }
 
-    public function selectLocation($lat, $long)
-    {
 
+    public function selectLocation($lat, $long, $name, $address)
+    {
         $this->dispatch('locationsUpdate', [[(float)$long, (float)$lat]]);
         $this->searchResults = [];
-        $this->searchTerm = '';
+        $this->searchTerm = $name;
     }
     public function render()
     {

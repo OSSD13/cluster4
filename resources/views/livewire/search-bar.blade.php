@@ -15,14 +15,14 @@
             <div class="flex-1 mx-4 relative" wire:key="search-bar-container">
                 <i
                     class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
-                <input type="text" placeholder="ค้นหา"
+                <input type="text" id="searchInput" placeholder="ค้นหา" wire:model="searchTerm"
                     oninput="Livewire.dispatch('updateSearchTerm', { value: this.value })"
                     class="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-300 bg-gray-100 text-sm focus:outline-none" />
                 @if (!empty($searchResults) && !empty($searchTerm))
-                    <ul class="absolute bg-white border rounded-md mt-1 w-full z-50">
+                    <ul id="searchDropdown" class="absolute bg-white border rounded-md mt-1 w-full z-50">
                         @foreach ($searchResults as $result)
                             <li class="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                wire:click="selectLocation('{{ $result['lat'] }}', '{{ $result['long'] }}')">
+                                wire:click="selectLocation(@js($result['lat']), @js($result['long']), @js($result['name']), @js($result['address']));">
                                 <label for="">{{ $result['name'] }}</label> <label class="text-gray-800 text-sm"
                                     for="">{{ $result['address'] }}</label>
                             </li>
@@ -61,4 +61,22 @@
             });
         });
     </script>
+
+    @once
+        <script>
+            document.addEventListener('pointerdown', function(event) {
+                const input = document.getElementById('searchInput');
+                const dropdown = document.getElementById('searchDropdown');
+
+                if (dropdown && !input.contains(event.target) && !dropdown.contains(event.target)) {
+                    dropdown.style.display = 'none';
+                }
+            });
+
+            document.getElementById('searchInput')?.addEventListener('focus', function() {
+                const dropdown = document.getElementById('searchDropdown');
+                if (dropdown) dropdown.style.display = 'block';
+            });
+        </script>
+    @endonce
 </div>

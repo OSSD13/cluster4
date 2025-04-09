@@ -33,7 +33,7 @@
 
                 {{-- tab content --}}{{-- tab branch --}}
                 <form id="branchTab" wire:submit.prevent="validateBranchForm"
-                    class="pb-normal tab-content pt-5 px-7 scrollbar-ios max-h-[80vh] overflow-y-auto overscroll-contain scrollbar-hidden scroll-container bg-white rounded-b-lg">
+                    class="pb-normal tab-content pt-5 px-7 pb-32 scrollbar-ios max-h-[80vh] overflow-y-auto overscroll-contain scrollbar-hidden scroll-container bg-white rounded-b-lg">
                     <label class="block mb-1">ชื่อสาขา <span class="text-red-500">*</span></label>
                     <input type="text" wire:model="nameBranch" class="border p-2 w-full rounded-md"
                         placeholder="กรุณาระบุชื่อสาขา">
@@ -167,6 +167,18 @@
                         <span><i class="fa-solid fa-house" style="color: #4D55A0;"></i></span><span
                             class="ml-2">สถานที่ใกล้เคียง</span>
                     </div>
+                    @if (count($nearbyPreview) > 0)
+                        <div class="mt-2 space-y-2">
+                            @foreach ($nearbyPreview as $place)
+                                <div class="grid grid-cols-2 gap-2 text-sm">
+                                    <span class="text-blue-600 ">{{ $place['name'] }}</span>
+                                    <span class="text-gray-600">{{ $place['distance'] }} กม.</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-400 mt-2">ยังไม่มีข้อมูลสถานที่ใกล้เคียง</p>
+                    @endif
 
                     <div class="flex justify-center mt-4">
                         <button type="submit" style="background-color: #4D55A0;"
@@ -198,12 +210,14 @@
 
             {{-- Tab Header --}}
             <div class="flex border-b mx-3 mt-4">
-                <button
+                <button id="detail-branch-btn"
                     class="w-1/2 py-2 text-center font-semibold  border-b-2 text-[#4D55A0] border-[#4D55A0]">ข้อมูล</button>
-                <button class="w-1/2 py-2 text-center font-semibold text-black">สถานที่ใกล้เคียง</button>
+                <button id="nearby-location-btn"
+                    class="w-1/2 py-2 text-center font-semibold text-black">สถานที่ใกล้เคียง</button>
             </div>
 
-            <div class="overflow-y-auto max-h-[calc(100dvh-4rem)] scrollbar-hidden px-4 pb-20">
+            <div id="data-detail-branch"
+                class="overflow-y-auto max-h-[calc(100dvh-4rem)] scrollbar-hidden px-4 pb-20">
                 {{-- Chart + Summary --}}
                 <div class="p-4 space-y-4">
                     {{-- <h2 class="text-lg font-bold">ยอดขายในปีนี้</h2> --}}
@@ -223,7 +237,7 @@
                     <div class="bg-white shadow-md border p-4 rounded-xl flex justify-between items-center mt-4">
                         <div>
                             <p class="mb-2">จำนวนออเดอร์ทั้งหมดของปีนี้</p>
-                            <p class="text-xl font-bold text-black">12,000 ชิ้น</p>
+                            <p class="text-xl font-bold text-black" id="order-branch"></p>
                         </div>
                         <div class="">
                             <i class="fa-solid fa-box fa-2xl" style="color: #4D55A0;"></i>
@@ -261,20 +275,22 @@
                     </div>
                     <div id="latlong-branch" class="text-sm text-blue-600 mt-2"></div>
                 </div>
-                <div class="grid grid-cols-2 gap-10 mt-5 mb-5">
-                    <div class="text-right">
-                        <button id="deleteBranchBtn"
-                            class="w-[120px] bg-white text-gray-600 border border-gray-600 px-6 py-2 rounded-lg font-bold text-base">
-                            ลบ
-                        </button>
+                @if (auth()->user()->us_role == 'CEO' || auth()->user()->us_role == 'Sales Supervisor')
+                    <div class="grid grid-cols-2 gap-10 mt-5 mb-5">
+                        <div class="text-right">
+                            <button id="deleteBranchBtn"
+                                class="w-[120px] bg-white text-gray-600 border border-gray-600 px-6 py-2 rounded-lg font-bold text-base">
+                                ลบ
+                            </button>
+                        </div>
+                        <div class="text-left">
+                            <button id="editBranchBtn"
+                                class="w-[120px] bg-white text-gray-600 border border-gray-600 px-6 py-2 rounded-lg font-bold text-base">
+                                แก้ไข
+                            </button>
+                        </div>
                     </div>
-                    <div class="text-left">
-                        <button id="editBranchBtn"
-                            class="w-[120px] bg-white text-gray-600 border border-gray-600 px-6 py-2 rounded-lg font-bold text-base">
-                            แก้ไข
-                        </button>
-                    </div>
-                </div>
+                @endif
                 {{-- Nearby Places --}}
                 {{-- <div class="border-t mt-2 px-4 pb-6">
                     <div class="space-y-3">
@@ -289,6 +305,13 @@
                         @endforeach
                     </div>
                 </div> --}}
+            </div>
+
+            <div id="nearby-branch" class="mt-5 overflow-y-auto max-h-[calc(100vh-250px)] px-4">
+                <!-- รายการสถานที่ -->
+            </div>
+            <div id="nearby-pagination" class="px-4 mb-4 mt-2 flex justify-center gap-2">
+                <!-- ปุ่ม pagination -->
             </div>
 
         </div>
@@ -754,13 +777,13 @@
 
 {{-- SweetAlert2 --}}
 <script>
-    const branchAlert = '/public/alert-icon/BranchAlert.png';
-    const deleteAlert = '/public/alert-icon/DeleteAlert.png';
-    const editAlert = '/public/alert-icon/EditAlert.png';
-    const errorAlert = '/public/alert-icon/ErrorAlert.png';
-    const orderAlert = '/public/alert-icon/OrderAlert.png';
-    const successAlert = '/public/alert-icon/SuccessAlert.png';
-    const userAlert = '/public/alert-icon/UserAlert.png';
+    const branchAlert = './public/alert-icon/BranchAlert.png';
+    const deleteAlert = './public/alert-icon/DeleteAlert.png';
+    const editAlert = './public/alert-icon/EditAlert.png';
+    const errorAlert = './public/alert-icon/ErrorAlert.png';
+    const orderAlert = './public/alert-icon/OrderAlert.png';
+    const successAlert = './public/alert-icon/SuccessAlert.png';
+    const userAlert = './public/alert-icon/UserAlert.png';
 
     // function _testAlert() {
     //     Livewire.dispatch('branch-added-alert');
@@ -940,6 +963,7 @@
         $('#phone-branch').empty();
         $('#latlong-branch').empty();
         $('#name-branch').empty();
+        $('#order-branch').empty();
 
         drawer.classList.remove("opacity-0", "pointer-events-none");
         drawer.classList.add("opacity-100");
@@ -967,12 +991,45 @@
             `(${latLong[1].toFixed(5)}, ${latLong[0].toFixed(5)}) <i class="ml-1 fa-solid fa-copy" style="color: #4D55A0;"></i>`
         );
         $('#name-branch').text(data.name);
+        console.log(data.orders);
+        let orders = data.orders;
+        orders = JSON.parse(orders);
+        let totalAmount = orders.reduce((sum, item) => sum + (item.amount ?? 0), 0);
 
+        $('#order-branch').html(`${totalAmount} ชิ้น`);
         // const images = Array.isArray(data.image) ? data.image : JSON.parse(data.image);
         // const imageHtml = images.map(img => `<img src="${img}" class="w-24 h-24 object-cover rounded" />`).join(
         //     '');
         // document.getElementById("drawerImages").innerHTML = imageHtml;
     }
+
+    function openNearbyTab(branchId) {
+        $('#data-detail-branch').addClass('hidden');
+        $('#nearby-branch').removeClass('hidden');
+        $('#nearby-location-btn').removeClass('text-black').addClass('border-b-2 text-[#4D55A0] border-[#4D55A0]');
+        $('#detail-branch-btn').removeClass('border-b-2 text-[#4D55A0] border-[#4D55A0]');
+
+        if (dataBranch) {
+            fetchNearby(dataBranch.id, 1);
+        }
+    }
+
+
+
+    $(document).on('click', '#nearby-location-btn', function(e) {
+        if (dataBranch) {
+            openNearbyTab(dataBranch.id); // 🚀 แบบไม่ผ่าน Livewire
+        }
+    })
+
+
+    $(document).on('click', '#detail-branch-btn', function() {
+        $('#nearby-branch').addClass('hidden');
+        $('#data-detail-branch').removeClass('hidden');
+        $('#detail-branch-btn').removeClass('text-black').addClass(
+            'border-b-2 text-[#4D55A0] border-[#4D55A0]');
+        $('#nearby-location-btn').removeClass('border-b-2 text-[#4D55A0] border-[#4D55A0]');
+    })
 
     $(document).on('click', '.tabToScroll', function() {
         const currentHeight = parseFloat(drawerContent.style.height);
@@ -1008,6 +1065,11 @@
         drawerContent.style.height = "35vh";
         drawer.classList.remove("opacity-100");
         drawer.classList.add("opacity-0", "pointer-events-none");
+        $('#nearby-branch').addClass('hidden');
+        $('#data-detail-branch').removeClass('hidden');
+        $('#detail-branch-btn').removeClass('text-black').addClass(
+            'border-b-2 text-[#4D55A0] border-[#4D55A0]');
+        $('#nearby-location-btn').removeClass('border-b-2 text-[#4D55A0] border-[#4D55A0]');
     }
 
     function updateDrawerHeight(height) {
@@ -1217,6 +1279,7 @@
                     manager_image,
                     manager_role,
                     manager_email,
+                    orders,
                 } = properties;
 
                 const center = geometry.coordinates;
@@ -1239,6 +1302,7 @@
                     manager_name,
                     manager_role,
                     manager_email,
+                    orders,
                 };
 
                 circleFeatures.push(circle);
@@ -1269,6 +1333,7 @@
                             source: 'branch-markers',
                             layout: {
                                 'icon-image': 'branch-icon-marker',
+                                'icon-allow-overlap': true,
                             },
                         });
                     }
@@ -1281,6 +1346,7 @@
                         source: 'branch-markers',
                         layout: {
                             'icon-image': 'branch-icon-marker',
+                            'icon-allow-overlap': true,
                         },
                     });
                 }
@@ -1310,40 +1376,6 @@
                     }
                 });
             }
-
-            let iconUrl =
-                `https://api.mapbox.com/v4/marker/pin-m-library+28A745.png?access_token=${mapboxgl.accessToken}`;
-            let iconILName = `school-icon`;
-
-            map.loadImage(iconUrl, (error, image) => {
-                if (!map.hasImage(iconILName)) {
-                    map.addImage(iconILName, image);
-                }
-            });
-
-            //ดึงข้อมูลสถานที่ที่น่า่สนใจ
-            map.addSource('interest', {
-                type: 'vector',
-                url: 'mapbox://pktonnam.1p9c1btr'
-            });
-
-            //เพิ่ม layer มหาวิทยาลัย + icon
-            map.addLayer({
-                id: 'college-layer',
-                type: 'symbol',
-                source: 'interest',
-                'source-layer': '22collegeanduniversity',
-                layout: {
-                    'icon-image': 'school-icon',
-                    'text-field': ['get', 'name'],
-                    'text-size': 12,
-                    'text-offset': [0, 1.2],
-                    'text-anchor': 'top'
-                },
-                paint: {
-                    'text-color': '#333',
-                }
-            });
         }
 
         map.on('load', () => {
@@ -1372,4 +1404,68 @@
             });
         });
     });
+
+
+    async function fetchNearby(branchId, page = 1) {
+        try {
+            const imageUrl =
+                `https://api.mapbox.com/v4/marker/pin-m-marker+4D55A0.png?access_token=${mapboxgl.accessToken}`;
+            const res = await fetch(`/nearby/${branchId}?page=${page}&per_page=5`);
+            const data = await res.json();
+            console.log(data)
+            const allNearby = data.nearby_combined.data;
+
+            const container = document.getElementById('nearby-branch');
+            container.innerHTML = '';
+            allNearby.forEach(place => {
+                const html = `
+        <div class="bg-white rounded-xl shadow-md border overflow-hidden flex mb-4">
+            <img class="w-[62px] h-[100px] object-cover object-top px-3 pt-5 rounded" src="https://api.mapbox.com/v4/marker/pin-m-marker+4D55A0.png?access_token=${mapboxgl.accessToken}"/>
+            <div class="flex-1 p-3 overflow-hidden">
+                <p class="text font-semibold text-black break-words whitespace-normal">${place.name}</p>
+                <p class="text-sm my-2 text-gray-600 break-words whitespace-normal">${place.address ?? '-'}</p>
+                <p class="text-sm text-gray-500 mt-1">ระยะทาง ${place.distance} กิโลเมตร</p>
+            </div>
+            <img src="${place.image ?? '/img/placeholder.png'}" alt="${place.name}" class="w-24 h-max-full object-cover">
+        </div>`;
+                container.innerHTML += html;
+            });
+
+            // 👇 ส่วน Pagination พร้อมปุ่ม “<< < 1 2 3 > >>”
+            const paginationDiv = document.getElementById('nearby-pagination');
+            paginationDiv.innerHTML = '';
+
+            const current = data.nearby_combined.current_page;
+            const last = data.nearby_combined.last_page;
+
+            let paginationHTML = `<div class="flex gap-2 justify-center mt-4">`;
+
+            if (current > 1) {
+                paginationHTML +=
+                    `
+        <button onclick="fetchNearby(${branchId}, 1)" class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200">«</button>
+        <button onclick="fetchNearby(${branchId}, ${current - 1})" class="w-9 h-9 rounded-full bg-gray-200 hover:bg-gray-300">‹</button>`;
+            }
+
+            for (let i = 1; i <= last; i++) {
+                paginationHTML += `
+        <button onclick="fetchNearby(${branchId}, ${i})"
+            class="w-9 h-9 rounded-full ${i === current ? 'bg-[#4D55A0] text-white font-bold' : 'bg-gray-100 text-gray-700 hover:bg-gray-300'}">
+            ${i}
+        </button>`;
+            }
+
+            if (current < last) {
+                paginationHTML +=
+                    `
+        <button onclick="fetchNearby(${branchId}, ${current + 1})" class="w-9 h-9 rounded-full bg-gray-200 hover:bg-gray-300">›</button>
+        <button onclick="fetchNearby(${branchId}, ${last})" class="w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200">»</button>`;
+            }
+
+            paginationHTML += `</div>`;
+            paginationDiv.innerHTML = paginationHTML;
+        } catch (err) {
+            console.error("❌ Nearby error:", err);
+        }
+    }
 </script>

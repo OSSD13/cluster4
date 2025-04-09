@@ -1,140 +1,171 @@
-
-
+{{--
+    @title : ดูข้อมูลสาขาทั้งหมด Role CEO
+    @author : Samitanan Taenil 66160376
+    @create date : 05/04/2568
+--}}
 @extends('layouts.default')
 @section('content')
-    <div class="pt-16 max-w-md mx-auto p-4 bg-gray-100 min-h-screen w-full">
-        {{-- หัวข้อ --}}
-        <div class="mb-4">
-            <div class="text-white text-xl font-extrabold py-3 rounded-2xl text-left" style="background-color: #4D55A0;">
-                <span style="padding-left: 5%;">My Map สาขาที่ 1</span>
+    <div class="pt-16 bg-white-100 w-full">
+        {{-- ปุ่มย้อนกลับและหัวข้อ --}}
+        <div class="mb-4 px-4">
+            <div class="text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
+                style="background-color: #4D55A0;">
+                <a href="{{ route('report_CEO') }}" class="mx-3 text-white">
+                    <i class="fa-solid fa-arrow-left fa-l"></i>
+                </a>
+                <span>สาขาของทั้งหมด (ปี {{ now()->year + 543 }})</span>
             </div>
-
         </div>
 
-        {{-- ปุ่มแท็บ --}}
-        <div class="flex justify-center items-center rounded-xl overflow-hidden">
-            <button
-                class="tab-btn w-1/3 py-1 px-4  font-bold text-center text-gray-800
-        hover:border-b-2 hover:border-[#4D55A0] whitespace-nowrap"
-                onclick="showTab('data')">ข้อมูล</button>
-            <button
-                class="tab-btn w-1/3 py-1 px-4  font-bold text-center text-gray-800
-        hover:border-b-2 hover:border-[#4D55A0] whitespace-nowrap flex justify-center"
-                onclick="showTab('location')">สถานที่ใกล้เคียง</button>
-        </div>
-        <div class="w-full h-px bg-gray-400 mb-4"></div>
-
-
-        {{-- Section: ข้อมูล --}}
-        <section id="data" class="tab-content">
-            <h2 class="text-base font-bold mb-4">ยอดขายในปีนี้</h2>
-            <canvas id="salesChart" class="mb-10"></canvas>
-
-
-
-            {{-- ตัวเลือกเดือน --}}
-            <div class="flex justify-center items-center mb-7">
-                <div class="inline-flex rounded-lg border border-gray-400 overflow-hidden shadow-sm">
-                    <button
-                        class="px-6 py-2 font-semibold text-gray-600 hover:bg-[#4D55A0] hover:text-white focus:bg-[#4D55A0] focus:text-white transition-colors duration-200">3
-                        เดือน</button>
-                    <div class="w-px bg-gray-400"></div>
-                    <button
-                        class="px-6 py-2 font-semibold text-gray-600 hover:bg-[#4D55A0] hover:text-white focus:bg-[#4D55A0] focus:text-white transition-colors duration-200">6
-                        เดือน</button>
-                    <div class="w-px bg-gray-400"></div>
-                    <button
-                        class="px-6 py-2 font-semibold text-gray-600 hover:bg-[#4D55A0] hover:text-white focus:bg-[#4D55A0] focus:text-white transition-colors duration-200">12
-                        เดือน</button>
-                </div>
+        {{-- ช่องค้นหา --}}
+        <form method="GET" action="{{ route('branchMyMap') }}">
+            <div id="search" class="flex space-x-2 mb-2 px-4 ">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="พิมพ์รหัสสาขา"
+                    class="block w-full rounded-md border-2 border-gray-300 px-3 py-2 focus:outline-indigo-400">
             </div>
 
-            {{-- จำนวนออเดอร์ --}}
-            <div class="flex items-center justify-between bg-white rounded-xl p-4 shadow">
-                <div>
-                    <p class="text-gray-800 ">จำนวนออเดอร์ทั้งหมดของปีนี้</p>
-                    <p class="text-2xl font-bold text-gray-800 mt-2">12,000 ชิ้น</p>
-                </div>
-                <svg class="w12 h-12 text-[#4D55A0]" fill="currentColor" viewBox="0 0 20 20">
-                    <path
-                        d="M2 3a1 1 0 011-1h2a1 1 0 011 1v1h8V3a1 1 0 011-1h2a1 1 0 011 1v3H2V3zm0 5h16v9a1 1 0 01-1 1H3a1 1 0 01-1-1V8z" />
-                </svg>
+            {{-- ผู้ใช้สามารถเลือกจังหวัดและเรียงยอดขายของสาที่ทำรายได้มากที่สุด --}}
+            @if (request('province'))
+                {{-- จังหวัด --}}
+                <input type="hidden" name="province" value="{{ request('province') }}">
+            @endif
+            @if (request('sort'))
+                {{-- เรียงยอดขาย --}}
+                <input type="hidden" name="sort" value="{{ request('sort') }}">
+            @endif
+        </form>
+
+
+        {{-- ผู้ใช้งานสามารถเลือกจังหวัดที่ต้องการจะดูได้ --}}
+        <form method="GET" action="{{ route('branchMyMap') }}" class="mb-4 flex gap-2 justify-start px-4">
+            <div class="relative w-full">
+                <select name="province" id="provinceSelect" onchange="this.form.submit()"
+                    class="block w-full rounded-md border-2 border-gray-300 p-2 text-gray-400 focus:outline-indigo-400">
+                    <option value="">เลือกจังหวัด</option>
+                    <option value="กรุงเทพมหานคร" {{ request('province') == 'กรุงเทพมหานคร' ? 'selected' : '' }}>
+                        กรุงเทพมหานคร</option>
+                    <option value="เชียงใหม่" {{ request('province') == 'เชียงใหม่' ? 'selected' : '' }}>เชียงใหม่</option>
+                    <option value="ขอนแก่น" {{ request('province') == 'ขอนแก่น' ? 'selected' : '' }}>ขอนแก่น</option>
+                    <option value="นครราชสีมา" {{ request('province') == 'นครราชสีมา' ? 'selected' : '' }}>นครราชสีมา
+                    </option>
+                    <option value="ภูเก็ต" {{ request('province') == 'ภูเก็ต' ? 'selected' : '' }}>ภูเก็ต</option>
+                    <option value="ชลบุรี" {{ request('province') == 'ชลบุรี' ? 'selected' : '' }}>ชลบุรี</option>
+                    <option value="นครนายก" {{ request('province') == 'นครนายก' ? 'selected' : '' }}>นครนายก</option>
+                    <option value="ปราจีนบุรี" {{ request('province') == 'ปราจีนบุรี' ? 'selected' : '' }}>ปราจีนบุรี
+                    </option>
+                    <option value="ระยอง" {{ request('province') == 'ระยอง' ? 'selected' : '' }}>ระยอง</option>
+                </select>
             </div>
-        </section>
-        {{-- กล่องข้อมูลผู้ดูแล --}}
-        <div class="flex items-center justify-center my-4">
-            <div class="flex-grow border-t border-gray-400"></div>
-            <span class="px-4 text-gray-500 font-medium">ผู้ดูแล</span>
-            <div class="flex-grow border-t border-gray-400"></div>
-        </div>
 
-        {{-- รูปภาพและชื่อ --}}
+            {{-- เลือกเรียงยอดขายที่ต้องการจะแสดง เช่น ยอดขายมากที่สุดและยอดขายน้อยที่สุด --}}
+            {{-- onchange คือ event ที่ทำงานเมื่อผู้ใช้เปลี่ยนค่าที่เลือกใน <select> --}}
+            {{-- this.form.submit() คือ JavaScript ที่สั่งให้ "ฟอร์มที่ <select> นี้อยู่ในนั้น" ทำการ submit ทันที
+--}}
+            <select name="sort" onchange="this.form.submit()"
+                class="block w-full rounded-md border-2 border-gray-300 p-2 text-gray-400  outline-indigo-400 flex justify-between items-center">
+                <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>ยอดขายมากที่สุด</option>
+                <option value="asc" {{ request('sort') == 'asc' ? 'selected' : '' }}>ยอดขายน้อยที่สุด</option>
+            </select>
 
-        <div class="flex flex-wrap items-center justify-center mb-4 space-x-4">
+            {{-- เก็บค่า search parameter ถ้ามีการใช้งาน --}}
+            @if (request('search'))
+                <input type="hidden" name="search" value="{{ request('search') }}">
+            @endif
+        </form>
 
-                <div class="flex items-center space-x-2 m-2">
-                    <img src="{{ asset('images/profile.jpg') }}" alt="user" class="w-14 h-14 rounded-full object-cover">
-                    <div>
+        {{-- วนลูปจำนวนสาขาที่มีข้อมูล --}}
+        <div id="branch-container">
+            @foreach ($paginatedBranches as $branch)
+                <div class="bg-white rounded-md p-4 mb-4 border-2 border-gray-300 mx-4 ">
+                    <p class="text-lg font-semibold text-gray-800">{{ $branch->br_name }}
+                        ({{ $branch->br_code }})
+                    </p>
+                    <div class="flex items-center mt-1">
+                        <img src="{{ $branch->us_image }}" alt="Photo User" class="w-12 h-12 rounded-full mr-3 ">
+                        <div>
+                            <p class="text-gray-700 font-medium">ผู้ดูแล {{ $branch->manager->us_fname ?? '-' }}
+                                {{ $branch->manager->us_lname ?? '-' }}</p>
+                            <p class="text-gray-700 font-medium mt-1">
+                                ตำแหน่ง
+                                @php
+                                    $role = $branch->manager->us_role ?? '-';
+                                    $roleColor = match ($role) {
+                                        'CEO' => 'text-yellow-700 border-yellow-700',
+                                        'Sales Supervisor' => 'text-purple-600 border-purple-400',
+                                        'Sales' => 'text-blue-500 border-blue-300',
+                                        default => 'text-gray-500 border-gray-300',
+                                    };
+                                @endphp
 
-
+                                <span class="px-2 py-1 border text-xs rounded-full bg-white {{ $roleColor }}">
+                                    {{ $role }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex items-center justify-between">
+                        <div class="flex">
+                            <div class="w-[60px] h-[1px]"></div>
+                            <p class="font-medium  text-blue-800"> ยอดรวม {{ number_format($branch->total_sales) }} ชิ้น
+                            </p>
+                        </div>
+                        <a href="{{ route('branchMyMap', $branch->br_id) }}"
+                            class="font-semibold text-sm text-blue-800">ดูเพิ่มเติม</a>
                     </div>
                 </div>
-
+            @endforeach
         </div>
 
-        {{-- รหัสสาขา --}}
-        <div class="w-full h-px bg-gray-400 mb-4"></div>
-        <div class="space-y-5 mb-1">
-            <p class="translate-x-[25px]">
-                <span class="font-semibold text-gray-800 text-lg">รหัสสาขา :</span> 268761
-            </p>
-        </div>
+        {{-- ปุ่มกดแสดงหน้าถัดไป --}}
+        @if (isset($totalPages) && $totalPages > 1)
+            <div class="flex justify-center mt-4 mb-6">
+                <nav class="inline-flex space-x-2">
+                    {{-- หน้าก่อนหน้านี้ --}}
+                    <a href="{{ request()->fullUrlWithQuery(['page' => max(1, $page - 1), 'search' => $search, 'sort' => $sort, 'province' => $province]) }}"
+                        class="w-10 h-10 flex items-center justify-center rounded-full {{ $page <= 1 ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100' }}">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </a>
 
-        {{-- ที่อยู่ติดต่อของสาขา --}}
-        <div class="flex items-start translate-x-[25px]">
-            <svg class="w-7 h-9 text-[#4D55A0]" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                    d="M10 2C6.134 2 3 5.134 3 9c0 5.25 7 9 7 9s7-3.75 7-9c0-3.866-3.134-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z" />
-            </svg>
-            <span class="text-gray-700 leading-relaxed">
-                123/321 ถนน ลงหาด ตำบล แสนสุข<br>
-                อำเภอ เมืองชลบุรี จังหวัด ชลบุรี 20130
-            </span>
-        </div>
+                    {{-- หน้าแรก --}}
+                    @if ($page > 3)
+                        <a href="{{ request()->fullUrlWithQuery(['page' => 1, 'search' => $search, 'sort' => $sort, 'province' => $province]) }}"
+                            class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-100">
+                            1
+                        </a>
 
-        {{-- เบอร์โทร --}}
-        <div class="flex items-center translate-x-[25px]">
-            <svg class="w-6 h-6 text-[#4D55A0]" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                    d="M2.003 5.884l.94-2.346A1 1 0 013.89 3h2.45a1 1 0 01.926.628l1.12 2.797a1 1 0 01-.217 1.062l-1.652 1.652a11.042 11.042 0 005.657 5.657l1.652-1.652a1 1 0 011.062-.217l2.797 1.12a1 1 0 01.628.926v2.45a1 1 0 01-.538.887l-2.346.94a2 2 0 01-1.967-.253l-2.123-1.591a15.978 15.978 0 01-7.562-7.562L2.256 7.85a2 2 0 01-.253-1.967z" />
-            </svg>
-            <span class=" text-gray-700">โทร 02-123-4567</span>
-        </div>
+                        @if ($page > 4)
+                            <span class="w-10 h-10 flex items-center justify-center">...</span>
+                        @endif
+                    @endif
 
-        {{-- พิกัด --}}
-        <span>(13.2814385, 100.9240104)</span>
-        <br>
-        <button onclick="copyCoords()" class="ml-2 text-gray-400 hover:text-gray-600">
-            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                    d="M8 2a2 2 0 00-2 2v1h1V4a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1h-1v1h1a2 2 0 002-2V4a2 2 0 00-2-2H8z" />
-                <path d="M3 6a2 2 0 012-2h6a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6z" />
-            </svg>
-        </button>
-        </p>
+                    {{-- หมายเลขหน้า --}}
+                    @for ($i = max(1, $page - 2); $i <= min($totalPages, $page + 2); $i++)
+                        <a href="{{ request()->fullUrlWithQuery(['page' => $i, 'search' => $search, 'sort' => $sort, 'province' => $province]) }}"
+                            class="w-10 h-10 flex items-center justify-center rounded-full {{ $i == $page ? 'bg-blue-800 text-white' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100' }}">
+                            {{ $i }}
+                        </a>
+                    @endfor
 
-        {{-- ปุ่มลบและแก้ไข --}}
-        <div class="pt-4 flex items-center justify-between">
-            <a href="#">
-                <button class="w-[120px] bg-white text-black border border-black px-6 py-2 rounded-lg font-bold text-base">
-                    ลบ
-                </button>
-            </a>
-            <button
-                class="w-[120px] bg-[#4D55A0] text-white border border-transparent px-6 py-2 rounded-lg font-bold text-base">
-                แก้ไข
-            </button>
-        </div>
+                    {{-- หน้าสุดท้าย --}}
+                    @if ($page < $totalPages - 2)
+                        @if ($page < $totalPages - 3)
+                            <span class="w-10 h-10 flex items-center justify-center">...</span>
+                        @endif
+
+                        <a href="{{ request()->fullUrlWithQuery(['page' => $totalPages, 'search' => $search, 'sort' => $sort, 'province' => $province]) }}"
+                            class="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-300 text-gray-700 hover:bg-gray-100">
+                            {{ $totalPages }}
+                        </a>
+                    @endif
+
+                    {{-- ปุ่มหน้าถัดไป --}}
+                    <a href="{{ request()->fullUrlWithQuery(['page' => min($totalPages, $page + 1), 'search' => $search, 'sort' => $sort, 'province' => $province]) }}"
+                        class="w-10 h-10 flex items-center justify-center rounded-full {{ $page >= $totalPages ? 'bg-gray-200 text-gray-500 cursor-not-allowed' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-100' }}">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </a>
+                </nav>
+            </div>
+        @endif
     </div>
 @endsection
 

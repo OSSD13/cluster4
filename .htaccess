@@ -4,6 +4,7 @@
     </IfModule>
 
     RewriteEngine On
+    # RewriteBase /cluster4/public/
 
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .

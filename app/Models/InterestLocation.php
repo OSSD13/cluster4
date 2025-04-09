@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -10,6 +11,7 @@ class InterestLocation extends Model
 {
     //
     use SoftDeletes;
+    use HasFactory;
     protected $table = 'interest_location';
     protected $primaryKey = 'il_id';
     public $timestamps = true;
@@ -23,6 +25,8 @@ class InterestLocation extends Model
         'il_district',
         'il_province',
         'il_postalcode',
+        'il_tl_id',
+        'il_us_id',
     ];
 
     public function user()

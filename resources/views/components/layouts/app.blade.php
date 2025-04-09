@@ -18,6 +18,20 @@
     <!-- Livewire Styles -->
     @livewireStyles
 
+    <!-- โหลดฟอนต์จาก Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai+Looped:wght@100;200;300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans Thai Looped', sans-serif;
+            font-style: normal;
+        }
+    </style>
+
     <!-- Icon FontAwesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
 
@@ -51,8 +65,8 @@
     <script type="text/javascript"
         src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dist/jquery.Thailand.min.js"></script>
 
-    {{-- Import CSS form --}}
-    <link rel="stylesheet" href="/resources/css/style.css">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <script src="{{ asset('js/livewire.js') }}" defer></script>
 
     <title>{{ $title ?? 'Page Title' }}</title>
 </head>

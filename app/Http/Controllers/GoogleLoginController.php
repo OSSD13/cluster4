@@ -7,8 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Laravel\Socialite\Facades\Socialite;
-
-
+use Psy\Sudo;
 
 // @author : Pakkapon Chomchoey 66160080
 
@@ -42,9 +41,10 @@ class GoogleLoginController extends Controller
             Session::flush();
             Auth::logout();
             Auth::login($userCheck);
+            Session::put('google_user', $userCheck);
             $userCheck->us_image = $user->avatar;
             $userCheck->save();
-            return redirect()->route('map');
+            return redirect()->route('home');
         } else {
             Session::forget('google_user');
             Session::flush();
