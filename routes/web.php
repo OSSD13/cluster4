@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\reportSale_sup2Controller;
+use App\Http\Middleware\CheckGoogleLogin;
+use App\Models\Branch;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SalesTeamController;
 use App\Http\Middleware\CheckGoogleLogin;
@@ -36,7 +39,6 @@ Route::get('/logout', function () {
 })->name('logout');
 
 Route::get('/cluster4/auth/google', [GoogleLoginController::class, 'redirectToGoogle'])->name('redirect.google');
-
 Route::get('/cluster4/auth/google/callback', [GoogleLoginController::class, 'googleCallback'])->name('callback.google');
 
 Route::middleware([CheckGoogleLogin::class])->group(
@@ -50,7 +52,6 @@ Route::middleware([CheckGoogleLogin::class])->group(
 
 
         Route::get('/manage-user', [UserController::class, 'index'])->name('manage.user');
-
 
         Route::get('/add-user', [UserController::class, 'add_user'])->name('add.user');
         Route::post('/add-user', [UserController::class, 'create'])->name('create.user');
@@ -78,6 +79,8 @@ Route::middleware([CheckGoogleLogin::class])->group(
 
         Route::get('/add-order', [OrderController::class, 'add_order']);
 
+Route::get('/edit-branch-detail/{br_id},{br_mount}', [BranchController::class, 'branch_detail'])->name('branchDetail');
+
         Route::get('/nearby/{branchId}', [NearbyController::class, 'index'])->name('nearby');
 
         Route::get('/order-status', [OrderController::class, 'status'])->name('order.status');
@@ -86,6 +89,19 @@ Route::middleware([CheckGoogleLogin::class])->group(
 
         Route::get('/reportCEO', [ReportController::class, 'report_CEO'])->name('report_CEO');
         Route::get('/report/team/{id}', [SalesTeamController::class, 'detail']);
+
+
+// หน้าแก้ไขคำสั่งซื้อ
+Route::get('/editOrder/{od_id}', [OrderController::class, 'editOrder'])->name('edit.order');
+// อัปเดตคำสั่งซื้อ 66160355
+Route::put('/edit-order/{od_id}', [OrderController::class, 'update'])->name('update.order');
+// ลบคำสั่งซื้อ (ใช้วิธีเปลี่ยนยอดขายเป็น 0) 66160355
+Route::post('/delete-order/{id}', [OrderController::class, 'delete_order_detail'])->name('delete.order');
+
+Route::get('/order-status', [OrderController::class, 'status'])->name('order.status');
+
+// หน้าสาขาพนักงานรายงานของ Sales Supervisor
+Route::get('/reportSale_sup2', [reportSale_sup2Controller::class, 'index'])->name('reportSale_sup2');
 
         Route::get('/reportSalesSup', [reportSalesSupervisorController::class, 'reportSalesSupervisor1'])->name('report_SalesSupervisor');
 

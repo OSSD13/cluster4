@@ -20,15 +20,17 @@ class Order extends Model
         'od_amount',
         'od_month',
         'od_year',
+        'od_br_id',
+        'od_us_id',
     ];
 
-    public function branch()
-    {
+    public function branch(){
         return $this->belongsTo(Branch::class, 'od_br_id', 'br_id');
     }
 
-    public function user()
-    {
+    public function user(){
         return $this->belongsTo(User::class, 'od_us_id', 'us_id');
     }
+
+    
 }

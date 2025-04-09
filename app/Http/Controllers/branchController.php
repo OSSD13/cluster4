@@ -91,6 +91,7 @@ class BranchController extends Controller
         return view('branchMyMap', compact('paginatedBranches', 'sort', 'province', 'totalPages', 'page', 'search'));
     }
 
+  
     private array $thaiMonths = [
         'มกราคม',
         'กุมภาพันธ์',
@@ -120,7 +121,6 @@ class BranchController extends Controller
         'พฤศจิกายน' => 11,
         'ธันวาคม' => 12,
     ];
-
 
 
     public function showSupervisor($id)
@@ -282,3 +282,4 @@ class BranchController extends Controller
         return $totalSalesAmount;
     }
 }
+
