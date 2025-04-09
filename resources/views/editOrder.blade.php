@@ -4,7 +4,7 @@
     <div class="pt-16 bg-white-100 w-full">
         {{-- ปุ่มย้อนกลับและหัวข้อ --}}
         <div class="mb-4 px-4">
-            <a href="{{ route('order.detail', ['br_id' => $order->od_br_id]) }}"
+            <a href="{{ url()->previous() }}"
                 class="text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
                 style="background-color: #4D55A0;">
                 <i class="fa-solid fa-arrow-left mx-3 fa-l"></i>
@@ -49,7 +49,7 @@
                 <div class="fixed bottom-0 left-0 w-full bg-white p-4">
                     <div class="flex justify-between">
                         {{-- ปุ่มยกเลิก --}}
-                        <a href="{{ route('order.detail', ['br_id' => $order->od_br_id]) }}"
+                        <a href="{{ url()->previous() }}"
                             class="w-[120px] text-center bg-white text-black border border-black px-6 py-2 rounded-lg font-bold text-base">
                             ยกเลิก
                         </a>

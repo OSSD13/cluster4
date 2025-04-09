@@ -51,24 +51,27 @@ Route::get('/cluster4/edit-user/{id}', [UserController::class, 'edit_user']);
 
 Route::put('/cluster4/edit-user', [UserController::class, 'edit_action'])->name('edit.user');
 
-Route::get('/cluster4/branchMyMap', [branchController::class, 'index'])->name('branchMyMap');
+// Route::get('/cluster4/branchMyMap', [branchController::class, 'index'])->name('branchMyMap');
 
 Route::get('/cluster4/map', MapLocation::class)->name('map');
 
 
 Route::get('/cluster4/order-detail/{br_id}', [OrderController::class, 'order_detail'])->name('orderDetail');
-Route::get('/cluster4/branch-detail/{br_id}', [BranchController::class, 'branch_detail'])->name('branchDetail');
-Route::get('/cluster4/edit-branch-detail/{br_id},{br_mount}', [BranchController::class, 'branch_detail'])->name('branchDetail');
+// Route::get('/cluster4/branch-detail/{br_id}', [BranchController::class, 'branch_detail'])->name('branchDetail');
+// Route::get('/cluster4/edit-branch-detail/{br_id},{br_mount}', [BranchController::class, 'branch_detail'])->name('branchDetail');
 
 
 Route::get('/cluster4/order', [OrderController::class, 'index'])->name('order');
 
 Route::get('/cluster4/add-order', [OrderController::class, 'add_order']);
 
+//@author Thakdanai
 // หน้าแก้ไขคำสั่งซื้อ
 Route::get('/cluster4/editOrder/{od_id}', [OrderController::class, 'editOrder'])->name('edit.order');
 // อัปเดตคำสั่งซื้อ
 Route::put('/cluster4/edit-order/{od_id}', [OrderController::class, 'update'])->name('update.order');
+Route::get('/cluster4/order-detail/{br_id}', [OrderController::class, 'order_detail'])->name('order.detail');
+
 // ลบคำสั่งซื้อ (ใช้วิธีเปลี่ยนยอดขายเป็น 0)
 Route::post('/cluster4/delete-order/{id}', [OrderController::class, 'delete_order_detail'])->name('delete.order');
 

@@ -38,13 +38,14 @@ class OrderController extends Controller
     public function editOrder($od_id)
     {
         $label = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-        $order = Order::find($od_id);
         $order = Order::with('branch')->find($od_id);
+       
 
         if (!$order) {
             return redirect()->route('edit.order', ['od_id' => $od_id]);
         }
         $users = User::all();
+    
         return view('editOrder', compact('order', 'users'));
     }
 
@@ -80,11 +81,11 @@ class OrderController extends Controller
         $order = Order::find($id);  // ค้นหาคำสั่งซื้อที่มี id ตรงกับ $id
 
         if ($order) {
-            $order->od_amount = 0;  // เปลี่ยนยอดขายเป็น 0
-            $order->save();  // บันทึกการเปลี่ยนแปลง
+            $order->od_amount = 0;  
+            $order->save();  
         }
 
-        return redirect()->back();  // กลับไปที่หน้าก่อนหน้า
+        return redirect()->back();  
     }
 
 
@@ -102,18 +103,30 @@ class OrderController extends Controller
         'พฤศจิกายน' => 11,
         'ธันวาคม' => 12,
     ];
+    
 
     public function order_detail($br_id)
     {
-        $thaiYear = Carbon::now()->year + 543;  
+        $thaiYear = Carbon::now()->year + 543;  // ปีปัจจุบัน (พ.ศ.)
         $branch = Branch::findOrFail($br_id);
         $user = User::findOrFail($branch->br_us_id);
 
         $monthlyOrders = $this->getMonthlyOrder($br_id, $thaiYear);
         $orderData = $this->formatOrderData($monthlyOrders);
         $medain = $this->monthlyMedianOrder($thaiYear);
-        $growthRate = $this-> growthRateCalculate($br_id, $thaiYear);
-        
+        $growthRate = $this->growthRateCalculate($br_id, $thaiYear);
+
+        // เพิ่มการสร้าง map ของ order id สำหรับแต่ละเดือน
+        $orderIdMap = [];
+        foreach ($monthlyOrders as $order) {
+            $monthName = trim($order->od_month);
+            $monthNumber = $this->monthMap[$monthName] ?? null;
+            if ($monthNumber) {
+                $orderIdMap[$monthNumber] = $order->od_id;
+            }
+        }
+
+        // ส่งข้อมูลทั้งหมดไปยัง view
         return view('orderDetail', [
             'branch'     => $branch,
             'user'       => $user,
@@ -122,8 +135,8 @@ class OrderController extends Controller
             'monthMap'   => $this->monthMap,
             'thisyear'   => $thaiYear,
             'medain'     => $medain,
-            'growthRate' => $growthRate, 
-            // dd($growthRate),
+            'growthRate' => $growthRate,
+            'orderIdMap' => $orderIdMap,  // ส่งข้อมูลใหม่ที่เพิ่มมา
         ]);
     }
 
@@ -215,7 +228,7 @@ class OrderController extends Controller
                 $monthlyMedian[$month] = 1;
             }
         }
-    
+
         return $monthlyMedian;
     }
 
@@ -265,10 +278,6 @@ class OrderController extends Controller
                 $percent = '0.00 % ';
             }
             return $percent;
-
+        }
     }
-
 }
-
-
-
