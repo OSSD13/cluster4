@@ -16,15 +16,27 @@ class OrderController extends Controller
 {
 
     private array $thaiMonths = [
-        'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
-        'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม',
+        'มกราคม',
+        'กุมภาพันธ์',
+        'มีนาคม',
+        'เมษายน',
+        'พฤษภาคม',
+        'มิถุนายน',
+        'กรกฎาคม',
+        'สิงหาคม',
+        'กันยายน',
+        'ตุลาคม',
+        'พฤศจิกายน',
+        'ธันวาคม',
     ];
-  
-  public function add_order(){
+
+    public function add_order()
+    {
         return view('addOrder');
     }
 
-    public function editOrder($od_id) {
+    public function editOrder($od_id)
+    {
         $label = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
         $order = Order::find($od_id);
         $order = Order::with('branch')->find($od_id);
@@ -36,7 +48,8 @@ class OrderController extends Controller
         return view('editOrder', compact('order', 'users'));
     }
 
-        public function update(Request $request) {
+    public function update(Request $request)
+    {
         $validated = $request->validate([
             'od_month' => 'required',
         ]);
@@ -62,10 +75,32 @@ class OrderController extends Controller
         return redirect()->route('order.detail', ['br_id' => $order->od_br_id]); // กลับไปที่หน้ารายละเอียด
     }
 
+    public function delete_order_detail($id)
+    {
+        $order = Order::find($id);  // ค้นหาคำสั่งซื้อที่มี id ตรงกับ $id
+
+        if ($order) {
+            $order->od_amount = 0;  // เปลี่ยนยอดขายเป็น 0
+            $order->save();  // บันทึกการเปลี่ยนแปลง
+        }
+
+        return redirect()->back();  // กลับไปที่หน้าก่อนหน้า
+    }
+
+
     private array $monthMap = [
-        'มกราคม' => 1, 'กุมภาพันธ์' => 2, 'มีนาคม' => 3, 'เมษายน' => 4,
-        'พฤษภาคม' => 5, 'มิถุนายน' => 6, 'กรกฎาคม' => 7, 'สิงหาคม' => 8,
-        'กันยายน' => 9, 'ตุลาคม' => 10, 'พฤศจิกายน' => 11, 'ธันวาคม' => 12,
+        'มกราคม' => 1,
+        'กุมภาพันธ์' => 2,
+        'มีนาคม' => 3,
+        'เมษายน' => 4,
+        'พฤษภาคม' => 5,
+        'มิถุนายน' => 6,
+        'กรกฎาคม' => 7,
+        'สิงหาคม' => 8,
+        'กันยายน' => 9,
+        'ตุลาคม' => 10,
+        'พฤศจิกายน' => 11,
+        'ธันวาคม' => 12,
     ];
 
     public function order_detail($br_id)
@@ -77,8 +112,19 @@ class OrderController extends Controller
         $monthlyOrders = $this->getMonthlyOrder($br_id, $thaiYear);
         $orderData = $this->formatOrderData($monthlyOrders);
         $medain = $this->monthlyMedianOrder($thaiYear);
-        $growthRate = $this-> growthRateCalculate($br_id, $thaiYear);
-        
+        $growthRate = $this->growthRateCalculate($br_id, $thaiYear);
+
+        // เพิ่มการสร้าง map ของ order id สำหรับแต่ละเดือน
+        $orderIdMap = [];
+        foreach ($monthlyOrders as $order) {
+            $monthName = trim($order->od_month);
+            $monthNumber = $this->monthMap[$monthName] ?? null;
+            if ($monthNumber) {
+                $orderIdMap[$monthNumber] = $order->od_id;
+            }
+        }
+
+        // ส่งข้อมูลทั้งหมดไปยัง view
         return view('orderDetail', [
             'branch'     => $branch,
             'user'       => $user,
@@ -87,10 +133,12 @@ class OrderController extends Controller
             'monthMap'   => $this->monthMap,
             'thisyear'   => $thaiYear,
             'medain'     => $medain,
-            'growthRate' => $growthRate, 
-            // dd($growthRate),
+            'growthRate' => $growthRate,
+            'orderIdMap' => $orderIdMap,  // ส่งข้อมูลใหม่ที่เพิ่มมา
         ]);
     }
+
+
     private function getMonthlyOrder(int $branchId, int $year)
     {
         return DB::table('order as o')
@@ -138,16 +186,16 @@ class OrderController extends Controller
     private function monthlyMedianOrder(int $year)
     {
         $months = $this->thaiMonths;
-    
+
         $orders = DB::table('order')
             ->select('od_month', 'od_amount')
             ->where('od_year', $year)
             ->whereIn('od_month', $months)
-            ->orderByRaw("FIELD(od_month, '".implode("','", $months)."')")
+            ->orderByRaw("FIELD(od_month, '" . implode("','", $months) . "')")
             ->get();
-    
+
         $monthlyData = [];
-    
+
         // จัดกลุ่มข้อมูลตามเดือน
         foreach ($orders as $order) {
             $month = $order->od_month;
@@ -156,37 +204,37 @@ class OrderController extends Controller
             }
             $monthlyData[$month][] = $order->od_amount;
         }
-    
+
         // คำนวณค่ามัธยฐานของแต่ละเดือน
         $monthlyMedian = [];
-    
+
         foreach ($months as $month) {
             if (!empty($monthlyData[$month])) {
                 $amounts = $monthlyData[$month];
                 sort($amounts);
                 $count = count($amounts);
                 $middle = floor($count / 2);
-    
+
                 if ($count % 2) {
                     $median = $amounts[$middle];
                 } else {
                     $median = ($amounts[$middle - 1] + $amounts[$middle]) / 2;
                 }
-    
+
                 $monthlyMedian[$month] = $median;
             } else {
                 $monthlyMedian[$month] = 1;
             }
         }
-    
+
         return $monthlyMedian;
     }
 
-    
+
     private function growthRateCalculate($branchId, $year)
     {
-        $currentMonthIndex = Carbon::now()->month - 1; 
-        $months = array_values($this->thaiMonths); 
+        $currentMonthIndex = Carbon::now()->month - 1;
+        $months = array_values($this->thaiMonths);
 
         // ถ้าเป็นมกราคม ยังไม่มีเดือนก่อนหน้าให้เปรียบเทียบ
         if ($currentMonthIndex === 0) {
@@ -211,30 +259,23 @@ class OrderController extends Controller
             ->where('od_month', $previousMonth)
             ->orderByDesc('od_id')
             ->value('od_amount');
-        
-            $thisMonth = $thisMonth ?? 0;
-            $lastMonth = $lastMonth ?? 0;
-        
-            // ถ้าเดือนก่อนมียอดขาย
-            if ($lastMonth != 0) {
-                $change = $thisMonth - $lastMonth;
-                $absPercent = number_format((abs($change) / abs($lastMonth)) * 100, 2);
-            
-                if ($change > 0) {
-                    $percent = '+ ' . $absPercent . ' % ';
-                } elseif ($change < 0) {
-                    $percent = '- ' . $absPercent . ' % ';
-                } else {
-                    $percent = '0.00 % ';
-                }
+
+        $thisMonth = $thisMonth ?? 0;
+        $lastMonth = $lastMonth ?? 0;
+
+        // ถ้าเดือนก่อนมียอดขาย
+        if ($lastMonth != 0) {
+            $change = $thisMonth - $lastMonth;
+            $absPercent = number_format((abs($change) / abs($lastMonth)) * 100, 2);
+
+            if ($change > 0) {
+                $percent = '+ ' . $absPercent . ' % ';
+            } elseif ($change < 0) {
+                $percent = '- ' . $absPercent . ' % ';
+            } else {
+                $percent = '0.00 % ';
             }
-            
-        
             return $percent;
-
+        }
     }
-
 }
-
-
-
