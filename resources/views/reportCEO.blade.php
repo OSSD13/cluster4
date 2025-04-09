@@ -132,7 +132,7 @@
                     </div>
                     <div class="flex flex-col items-center"> <!-- flex column ที่นี่ -->
                         <i class="fa-solid fa-users fa-2xl mt-3" style="color: #4D55A0;"></i>
-                        <a href="{{ route('team') }}" class="text-blue-600 font-sm hover:text-blue-700 mt-7">
+                        <a href="{{ route('salesTeamMyMap') }}" class="text-blue-600 font-sm hover:text-blue-700 mt-7">
                             ดูเพิ่มเติม
                         </a>
                     </div>

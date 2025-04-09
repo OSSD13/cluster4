@@ -194,16 +194,16 @@
                             <span
                                 class="text-{{ $percent < 0 ? 'red' : ($percent > 0 ? 'green' : 'gray') }}-500 text-sm font-semibold">
                                 @if ($percent < 0)
-                                    - {{ number_format($percent) }}%
+                                    {{ '- ' . number_format((float) $percent) . ' %' }}
                                 @elseif ($percent > 0)
-                                    + {{ number_format($percent) }}%
+                                    {{ '+ ' . number_format((float) $percent) . ' %' }}
                                 @else
-                                    {{ number_format($percent) }}%
+                                    {{ number_format((float) $percent) . ' %' }}
                                 @endif
                             </span>
                         </h2>
                         <p class="text-gray-400 text-xs">ค่าเฉลี่ยยอดขายอยู่ที่ <span
-                                class="font-semibold">{{ number_format($averageSales) }}</span> ชิ้น</p>
+                                class="font-semibold">{{ number_format((float) $averageSales) }}</span> ชิ้น</p>
                     </div>
                     <div class="pr-4">
                         <i class="fa-solid fa-box fa-2xl scale-150" style="color: #4d55a0;"></i>
@@ -420,7 +420,7 @@
                                             1
                                         </span>
                                     </div>
-                                    <span class="text-sm font-semibold mt-1"
+                                    <span class="text-lg font-semibold mt-1"
                                         id="amountUser{{ $index }}">{{ number_format($topUser->branch_count) }}
                                     </span>
                                 @elseif ($index == 1)
@@ -431,7 +431,7 @@
                                             2
                                         </span>
                                     </div>
-                                    <span class="text-sm font-semibold mt-1"
+                                    <span class="text-lg font-semibold mt-1"
                                         id="amountUser{{ $index }}">{{ number_format($topUser->branch_count) }}
                                     </span>
                                 @elseif ($index == 2)
@@ -442,11 +442,11 @@
                                             3
                                         </span>
                                     </div>
-                                    <span class="text-sm font-semibold mt-1"
+                                    <span class="text-lg font-semibold mt-1"
                                         id="amountUser{{ $index }}">{{ number_format($topUser->branch_count) }}
                                     </span>
                                 @else
-                                    <span class="text-sm font-semibold mt-1"
+                                    <span class="text-lg font-semibold mt-1"
                                         id="amountUser{{ $index }}">{{ number_format($topUser->branch_count) }}
                                     </span>
                                 @endif

@@ -32,7 +32,7 @@
                 <div class="space-y-12">
                     <div class="border- border-gray-900/10 pb-5">
                         {{-- <h1 class="text-lg font-semibold text-gray-900">สมศักดิ์ รักดี</h1> --}}
-                        <h1 class="text-gray-900">{{ $users->us_fname }} {{ $users->us_lname }}</h1>
+                        <h1 class="text-gray-900 mt-2">{{ $users->us_fname }} {{ $users->us_lname }}</h1>
                         <p class="mt-1 text-gray-600">{{ $users->us_email }}</p>
                         <hr class="my-4 border-gray-300">
                         <div class="mt- grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">

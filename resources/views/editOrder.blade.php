@@ -23,7 +23,8 @@
                 เดือน{{ $order->od_month }} {{ $order->od_year }}
             </p>
 
-            {{-- ฟอร์มแก้ไขยอดขาย --}}
+            
+            <!-- ฟอร์มแก้ไขในหน้า editOrder.blade.php -->
             <form id="updateForm" action="{{ route('update.order', ['od_id' => $order->od_id]) }}" method="POST"
                 class="space-y-4">
                 @csrf
@@ -64,7 +65,6 @@
 
 
             </form>
-
         </div>
     </div>
 

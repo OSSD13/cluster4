@@ -67,7 +67,10 @@
 
     <link rel="stylesheet" href="./public/css/style.css">
 
-    <script src="./js/livewire.js" defer></script>
+
+    {{-- ถ้าไม่ได้อีกลองใช้แบบนี้แม้ง --}}
+    {{-- <script src="/livewire/livewire.js" data-turbo-eval="false" data-csrf="{{ csrf_token() }}"></script> --}}
+
 
     <title>{{ $title ?? 'Page Title' }}</title>
 </head>
@@ -79,9 +82,7 @@
 
     @livewireScripts
     <script>
-        document.addEventListener('livewire:load', () => {
-            Livewire.onPageExpired((response, message) => {})
-        })
+        Livewire.onPageExpired((response, message) => {})
     </script>
 
 
