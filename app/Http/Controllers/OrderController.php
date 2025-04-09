@@ -75,6 +75,7 @@ class OrderController extends Controller
         return redirect()->route('order.detail', ['br_id' => $order->od_br_id]); // กลับไปที่หน้ารายละเอียด
     }
 
+    // author : 66160355
     public function delete_order_detail($id)
     {
         $order = Order::find($id);  // ค้นหาคำสั่งซื้อที่มี id ตรงกับ $id

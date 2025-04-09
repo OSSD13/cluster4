@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\reportSale_sup2Controller;
 use App\Http\Middleware\CheckGoogleLogin;
 use App\Models\Branch;
 use PHPUnit\Runner\HookMethod;
@@ -67,11 +68,14 @@ Route::get('/cluster4/add-order', [OrderController::class, 'add_order']);
 
 // หน้าแก้ไขคำสั่งซื้อ
 Route::get('/cluster4/editOrder/{od_id}', [OrderController::class, 'editOrder'])->name('edit.order');
-// อัปเดตคำสั่งซื้อ
+// อัปเดตคำสั่งซื้อ 66160355
 Route::put('/cluster4/edit-order/{od_id}', [OrderController::class, 'update'])->name('update.order');
-// ลบคำสั่งซื้อ (ใช้วิธีเปลี่ยนยอดขายเป็น 0)
+// ลบคำสั่งซื้อ (ใช้วิธีเปลี่ยนยอดขายเป็น 0) 66160355
 Route::post('/cluster4/delete-order/{id}', [OrderController::class, 'delete_order_detail'])->name('delete.order');
 
 Route::get('/cluster4/order-status', [OrderController::class, 'status'])->name('order.status');
 
 Route::get('/cluster4/employee', [UserController::class, 'Emp_GrowRate']);
+
+// หน้าสาขาพนักงานรายงานของ Sales Supervisor
+Route::get('cluster4/reportSale_sup2', [reportSale_sup2Controller::class, 'index'])->name('reportSale_sup2');

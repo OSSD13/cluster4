@@ -48,8 +48,8 @@
 
         </div>
 
-
         {{-- กราฟยอดขาย --}}
+        {{--  @author : 66160355 : แก้ class นิดหน่อย --}}
         <div class="bg-white p-4 rounded-lg shadow mt-4" style="height: auto">
             <div class="flex justify-between items-center mb-4">
                 <p class="text-lg font-bold">ยอดขายในปีนี้</p>
@@ -99,6 +99,7 @@
                         <div x-show="open" @click.outside="open = false" x-cloak
                             class="absolute right-0 mt-2 bg-white shadow-md rounded-lg w-28 z-10 border border-gray-200">
                             <ul class="divide-y text-sm text-gray-700">
+                                {{--  @author : 66160355 : แก้ไขกับลบ --}}
                                 {{-- แก้ไข --}}
                                 <form action="{{ route('edit.order', ['od_id' => $orderIdMap[$monthNumber] ?? 0]) }}"
                                     method="GET">
@@ -254,6 +255,7 @@
         `;
         }).join('');
 
+        // author : 66160355
         // Delete Order
         function deleteOrder(event, monthNumber) {
             const deleteAlert = '/public/alert-icon/DeleteAlert.png';
