@@ -94,7 +94,7 @@ class UserController extends Controller
     --}} */
     public function delete_user(Request $req)
     {
-        if ($req->has('ids')) { // เช็คว่ามี id หรือไม่
+        if ($req->has('ids')) { // เช็คว่ามี ids หรือไม่
             User::whereIn('us_id', $req->ids)->delete(); // ใช้ whereIn เพื่อลบหลายรายการพร้อมกัน
         } else if ($req->has('id')) { // ถ้ามี id เดียว
             User::where('us_id', $req->id)->delete(); // ถ้ามี id เดียวให้ลบรายการนั้น
