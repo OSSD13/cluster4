@@ -217,57 +217,48 @@ class ReportSalesSupervisorController extends Controller
     //By เวฟ
     public function reportSalesSupervisor1(Request $request)
     {
-        $user = Auth::user();  // ดึงข้อมูลของผู้ใช้ที่ล็อกอิน
-        $selectedSupYear = (int) $request->input('year', Carbon::now()->year + 543);
+        $supervisor = Auth::user();
 
-        // คิวรีสำหรับยอดขายรายเดือนตามผู้ดูแล (supervisor)
-        $query = DB::table('order')
-            ->join('branch', 'order.od_br_id', '=', 'branch.br_id')
-            ->join('users', 'order.od_us_id', '=', 'users.us_id')
-            ->select('order.od_month', 'branch.br_province', 'users.us_fname', DB::raw('SUM(order.od_amount) as total_sales'))
-            ->where('order.od_year', $selectedSupYear)
-            ->where('order.od_us_id', $user->us_id)
-            ->groupBy('order.od_month', 'branch.br_province', 'users.us_fname')
-            ->get();
+        // ปีที่เลือก หรือปีปัจจุบัน (พ.ศ.)
+        $year = $request->input('year', now()->year + 543);
 
-        // คิวรีสำหรับดึงปีทั้งหมดที่มีในตาราง order
-        $allYears = DB::table('order')
-            ->select('od_year')
-            ->distinct()
-            ->orderBy('od_year', 'desc')
-            ->pluck('od_year');
+        // แทนที่จะดึงลูกทีม ดึงข้อมูลของตัวเอง (Supervisor)
+        $salesId = $supervisor->us_id;
 
-        // คำนวณยอดขายรวมทั้งหมดในปีที่เลือก
-        $totalSalesSup = DB::table('order')
-            ->where('order.od_year', $selectedSupYear)
-            ->where('order.od_us_id', $user->us_id)  // แก้ไขจาก $user->id เป็น $user->us_id
-            ->sum('order.od_amount');  // ใช้ SUM() เพื่อคำนวณยอดขายทั้งหมดในปีที่เลือก
+        // จำนวนพนักงาน (ในที่นี้คือ 1 เพราะเป็นตัวเอง)
+        $employeeCount = 1;
 
-        // คำนวณยอดขายปีที่ผ่านมา
-        $previousYear = $selectedSupYear - 1;  // ปีที่ผ่านมา
-        $previousYearSales = DB::table('order')
-            ->where('order.od_year', $previousYear)
-            ->where('order.od_us_id', $user->us_id)  // แก้ไขจาก $user->id เป็น $user->us_id
-            ->sum('order.od_amount');  // ใช้ SUM() เพื่อคำนวณยอดขายปีที่ผ่านมา
+        // สาขาที่ supervisor ดูแลโดยตรง
+        $branchIds = Branch::where('br_us_id', $salesId)->pluck('br_id');
+        $branchCount = $branchIds->count();
 
-        // คำนวณเปอร์เซ็นต์การเติบโต
-        if ($previousYearSales > 0) {
-            $growthPercentage = (($totalSalesSup - $previousYearSales) / $previousYearSales) * 100;
-        } else {
-            $growthPercentage = $totalSalesSup > 0 ? 100 : 0; // ถ้ายอดขายปีที่ผ่านมาเป็น 0
+        // ยอดขายรวมของปีนั้น ๆ (เฉพาะสาขาที่ supervisor ดูแลโดยตรง)
+        $totalSales = Order::whereIn('od_br_id', $branchIds)
+            ->where('od_year', $year)
+            ->sum('od_amount');
+
+        // ปีที่แล้ว
+        $lastYear = $year - 1;
+
+        // ดึงจำนวนสาขาของปีที่แล้ว (ที่ supervisor ดูแลโดยตรง)
+        $lastYearBranchIds = Branch::where('br_us_id', $salesId)->pluck('br_id');
+        $branchCountLastYear = $lastYearBranchIds->count();
+
+        // คำนวณเปอร์เซ็นต์การเพิ่มขึ้นของสาขา
+        $branchGrowthPercent = 0;
+        if ($branchCountLastYear > 0) {
+            $branchGrowthPercent = number_format(
+                (($branchCount - $branchCountLastYear) / $branchCountLastYear) * 100,
+                2
+            );
         }
 
-        // คำนวณค่าเฉลี่ยยอดขายรายเดือนในปีที่เลือก
-        $totalMonths = DB::table('order')
-            ->where('order.od_year', $selectedSupYear)
-            ->where('order.od_us_id', $user->us_id)  // แก้ไขจาก $user->id เป็น $user->us_id
-            ->distinct()
-            ->count('od_month'); // จำนวนเดือนที่มีการขายในปีที่เลือก
+        // ดึงออเดอร์ทั้งหมดของปีนั้น ๆ (เฉพาะสาขาที่ supervisor ดูแลโดยตรง)
+        $orders = Order::whereIn('od_br_id', $branchIds)
+            ->where('od_year', $year)
+            ->get();
 
-        $averageSales = $totalMonths > 0 ? $totalSalesSup / $totalMonths : 0; // ค่าเฉลี่ยยอดขายรายเดือน
-
-        // แผนที่เดือนในภาษาไทย
-        $monthMap = [
+        $thaiMonths = [
             'มกราคม',
             'กุมภาพันธ์',
             'มีนาคม',
@@ -279,125 +270,77 @@ class ReportSalesSupervisorController extends Controller
             'กันยายน',
             'ตุลาคม',
             'พฤศจิกายน',
-            'ธันวาคม',
+            'ธันวาคม'
+        ];
+        $monthMap = array_flip($thaiMonths);
+
+        // ข้อมูลยอดขายรายไตรมาส
+        $quarterSales = [
+            'Q1' => 0,
+            'Q2' => 0,
+            'Q3' => 0,
+            'Q4' => 0
         ];
 
-        $orders = DB::table('order')
-            ->select('od_month', 'od_amount')
-            ->where('od_year', $selectedSupYear)
-            ->where('od_us_id', $user->us_id) // กรองตามผู้ใช้งานที่ล็อกอิน
-            ->whereIn('od_month', $monthMap)
-            ->orderByRaw("FIELD(od_month, '" . implode("','", $monthMap) . "')")
-            ->get();
+        // ข้อมูลยอดขายรายเดือน
+        $orderData = collect($orders)
+            ->groupBy('od_month')
+            ->map(function ($orders) {
+                return $orders->sum('od_amount');
+            });
 
-        // จัดกลุ่มข้อมูลตามเดือน
-        $monthlyData = [];
-        foreach ($orders as $order) {
-            $month = $order->od_month;
-            if (!isset($monthlyData[$month])) {
-                $monthlyData[$month] = [];
-            }
-            $monthlyData[$month][] = $order->od_amount;
+        $completeOrderData = collect($thaiMonths)->mapWithKeys(function ($month) use ($orderData) {
+            return [$month => $orderData->get($month, 0)];
+        });
+
+        // ค่ามัธยฐานยอดขายรายเดือน
+        $medain = array_fill(0, 12, $completeOrderData->median());
+
+        // ยอดขายแต่ละสาขา
+        $branchSales = [];
+        foreach ($branchIds as $index => $branchId) {
+            $branchSales[] = [
+                'branch_name' => Branch::find($branchId)->br_name,
+                'sales' => $orders->where('od_br_id', $branchId)->sum('od_amount'),
+                'growth' => $this->calculateGrowth($branchId, $orders, $year)
+            ];
         }
-
-
-        // คำนวณยอดขายรวมในแต่ละเดือน
-        $monthlyTotal = [];
-        foreach ($monthMap as $month) {
-            if (!empty($monthlyData[$month])) {
-                $amounts = $monthlyData[$month];
-                $total = array_sum($amounts);
-                $monthlyTotal[$month] = $total;
-            } else {
-                $monthlyTotal[$month] = 0;
-            }
-        }
-
-
-
-        // คำนวณค่าเฉลี่ย (Median) ของยอดขายในแต่ละเดือน
-        $monthlyMedian = [];
-        foreach ($monthMap as $month) {
-            if (!empty($monthlyData[$month])) {
-                $amounts = $monthlyData[$month];
-                sort($amounts);
-                $count = count($amounts);
-                $middle = floor($count / 2);
-                if ($count % 2) {
-                    $median = $amounts[$middle];
-                } else {
-                    $median = ($amounts[$middle - 1] + $amounts[$middle]) / 2;
-                }
-                $monthlyMedian[$month] = $median;
-            } else {
-                $monthlyMedian[$month] = 0;
-            }
-        }
-        // dd($monthlyTotal);
-
-        $currentUserId = Auth::user()->us_id;
-
-        // ดึงรายชื่อ user ที่มี us_head = คนที่ login
-
-        $branchIds = Branch::where('br_us_id', $currentUserId)
-            ->whereNull('deleted_at')
-            ->pluck('br_id');
-
-        $branchCount = DB::table('branch')
-            ->whereIn('br_id', $branchIds)
-            ->whereYear('created_at', $selectedSupYear - 543)
-            ->count('br_id');
-
-        $branchCountPrevion = DB::table('branch')
-            ->whereIn('br_id', $branchIds)
-            ->whereYear('created_at', $selectedSupYear - 1 - 543)
-            ->count('br_id');
-
-
-        $branchPercen = 0;
-        if ($branchCountPrevion > 0) {
-            $branchPercen = (($branchCount - $branchCountPrevion) / $branchCountPrevion) * 100;
-        }
-
-        $branchesRank = DB::table('branch')
-            ->join('order', 'branch.br_id', '=', 'order.od_br_id')
-            ->select('branch.br_id', 'branch.br_name', DB::raw('SUM(order.od_amount) as total_sales'))
-            ->where('order.od_year', $selectedSupYear)  // กรองปีที่เลือก
-            ->where('order.od_us_id', $user->us_id)  // กรองตามผู้ใช้งานที่ล็อกอิน
-            ->groupBy('branch.br_id', 'branch.br_name')
-            ->orderByDesc('total_sales')  // จัดอันดับยอดขายจากมากไปน้อย
-            ->get();
-
-
-        foreach ($branchesRank as $branch) {
-            if (isset($previousYearSales[$branch->br_id])) {
-                $previousSales = $previousYearSales[$branch->br_id]->total_sales;
-                if ($previousSales > 0) {
-                    $branch->growth_percentage = (($branch->total_sales - $previousSales) / $previousSales) * 100;
-                } else {
-                    $branch->growth_percentage = $branch->total_sales > 0 ? 100 : 0;
-                }
-            } else {
-                $branch->growth_percentage = 0;
-            }
-        }
-
 
         // ส่งข้อมูลไปยัง view
-        return view('homeReportSalesSupervisor', [
-            'selectedSupYear' => $selectedSupYear,
-            'allYears' => $allYears,
-            'query' => $query,  // ส่งผลลัพธ์ของยอดขายรายเดือนตามผู้ดูแล
-            'totalSalesSup' => $totalSalesSup, // ส่งยอดขายรวมทั้งหมดในปีที่เลือก
-            'growthPercentage' => $growthPercentage, // ส่งเปอร์เซ็นต์การเติบโต
-            'averageSales' => $averageSales, // ส่งค่าเฉลี่ยยอดขายรายเดือน
-            'monthlyTotal' => $monthlyTotal, // ส่งยอดขายรวมรายเดือน
-            'monthlyMedian' => $monthlyMedian, // ส่งค่าเฉลี่ย (Median) ของยอดขายรายเดือน
-            'branchCount' => $branchCount,
-            'branchPercen' => $branchPercen,
-            'branchesRank' => $branchesRank,
-            'monthMap' => $monthMap,
+        return view('HomereportSalesSupervisor', compact(
+            'totalSales',
+            'year',
+            'employeeCount',
+            'branchCount',
+            'branchGrowthPercent',
+            'quarterSales',
+            'completeOrderData',
+            'thaiMonths',
+            'medain',
+            'branchSales'
+        ));
+    }
 
-        ]);
+    /**
+     * คำนวณเปอร์เซ็นต์การเติบโตของยอดขายของแต่ละสาขา
+     */
+    private function calculateGrowth($branchId, $orders, $year)
+    {
+        // คำนวณยอดขายในปีนี้
+        $thisYearSales = $orders->where('od_br_id', $branchId)
+            ->where('od_year', $year)
+            ->sum('od_amount');
+
+        // คำนวณยอดขายในปีที่แล้ว
+        $lastYearSales = $orders->where('od_br_id', $branchId)
+            ->where('od_year', $year - 1)
+            ->sum('od_amount');
+
+        // คำนวณเปอร์เซ็นต์การเติบโต
+        if ($lastYearSales > 0) {
+            return number_format((($thisYearSales - $lastYearSales) / $lastYearSales) * 100, 2);
+        }
+
+        return 0;
     }
 }
