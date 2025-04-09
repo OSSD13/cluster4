@@ -62,6 +62,8 @@ class HomeController extends Controller
             ->take(5)  // ดึง 5 คน
             ->get();
 
+//=================================================================================================================================================
+//=================================================================================================================================================
 
         //@auther : boom
         $monthMap = [
@@ -82,7 +84,19 @@ class HomeController extends Controller
 
         $thisYear = Carbon::now()->year + 543;
         // ยอดขายทั้งหมดปีนี้
-        $totalSales = Order::where('od_year', $thisYear)->sum('od_amount');
+        // $totalSales = Order::where('od_year', $thisYear)->sum('od_amount');
+        $totalSales = DB::table(DB::raw("
+            (
+                SELECT *, ROW_NUMBER() OVER (
+                    PARTITION BY od_month, od_br_id
+                    ORDER BY od_id DESC
+                ) as rn
+                FROM `order`
+                WHERE od_year = $thisYear
+            ) as ranked
+        "))
+            ->where('rn', 1)
+            ->sum('od_amount');
 
         // ยอดขายปีก่อนหน้า
         $previousYearSales = Order::where('od_year', $thisYear - 1)->sum('od_amount');
@@ -100,24 +114,42 @@ class HomeController extends Controller
             if ($change > 0) {
                 $percent = $absPercent;
             } elseif ($change < 0) {
-                $percent = $absPercent ;
+                $percent = $absPercent;
             } else {
                 $percent = 0;
             }
-        }else{
+        } else {
             $percent = 100;
         }
 
-
-
         $months = $monthMap;
 
-        $orders = DB::table('order')
+
+        $monthsStr = implode("','", $months);
+
+        $orders = DB::table(DB::raw("
+            (
+                SELECT *, ROW_NUMBER() OVER (
+                    PARTITION BY od_month, od_br_id
+                    ORDER BY od_id DESC
+                ) as rn
+                FROM `order`
+                WHERE od_year = $thisYear AND od_month IN ('$monthsStr')
+            ) as ranked
+            "))
+            ->where('rn', 1)
             ->select('od_month', 'od_amount')
-            ->where('od_year', $thisYear)
-            ->whereIn('od_month', $months)
-            ->orderByRaw("FIELD(od_month, '" . implode("','", $months) . "')")
+            ->orderByRaw("FIELD(od_month, '" . $monthsStr . "')")
             ->get();
+
+
+
+        // $orders = DB::table('order')
+        //     ->select('od_month', 'od_amount')
+        //     ->where('od_year', $thisYear)
+        //     ->whereIn('od_month', $months)
+        //     ->orderByRaw("FIELD(od_month, '" . implode("','", $months) . "')")
+        //     ->get();
 
         $monthlyData = [];
 
@@ -130,6 +162,8 @@ class HomeController extends Controller
             }
             $monthlyData[$month][] = $order->od_amount;
         }
+
+
 
         // คำนวณค่ามัธยฐานของแต่ละเดือน
         $monthlyMedian = [];
@@ -154,35 +188,29 @@ class HomeController extends Controller
         }
 
 
-
-
-
-
-
-
-
-
-
-
         // $thisYear = Carbon::now()->year + 543;
-        // //ดึงข้อมูลยอดขายรายเดือน
-        // $salesData = Order::where('od_year', $thisYear) // ปีล่าสุด
+
+
+        // $salesData = Order::where('od_year', $thisYear)
         //     ->selectRaw('od_month, SUM(od_amount) as total_sales')
         //     ->groupBy('od_month')
-        //     ->orderByRaw("FIELD(od_month, 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม')")
-        //     ->get();
+        //     ->orderByRaw("FIELD(od_month, '" . implode("','", $months) . "')")
+        //     ->get()
+        //     ->keyBy('od_month'); // แปลงให้เข้าถึงตามชื่อเดือน
 
-        $salesData = Order::where('od_year', $thisYear)
-            ->selectRaw('od_month, SUM(od_amount) as total_sales')
-            ->groupBy('od_month')
-            ->orderByRaw("FIELD(od_month, '" . implode("','", $months) . "')")
-            ->get()
-            ->keyBy('od_month'); // แปลงให้เข้าถึงตามชื่อเดือน
 
         $monthlySales = [];
         foreach ($months as $month) {
-            $monthlySales[$month] = isset($salesData[$month]) ? $salesData[$month]->total_sales : 0;
+            $monthlySales[$month] = 0;
         }
+
+
+
+        // รวมยอดขายแต่ละเดือน
+        foreach ($orders as $order) {
+            $monthlySales[$order->od_month] += $order->od_amount;
+        }
+
 
         // คำนวณ median + 2SD สำหรับแต่ละเดือน
         $monthlyPlus2SD = [];
@@ -244,10 +272,6 @@ class HomeController extends Controller
         }
 
 
-
-
-
-
         // dd($salesData);
 
         // $salesData = DB::table('order')
@@ -296,9 +320,11 @@ class HomeController extends Controller
         $maxY = max(array_merge($monthlySalesOnly, array_values($monthlyMedian), array_values($monthlyPlus2SD)));
         // ปัดขึ้นไปใกล้ค่าที่ต้องการ
         $maxY = ceil($maxY / 10000) * 10000; // ปัดขึ้นไปเป็น 10000, 100000 หรือใกล้เคียง
+        $maxSales = max($monthlySales);
+        $minSales = min($monthlySales);
 
-
-
+//=================================================================================================================================================
+//=================================================================================================================================================
 
 
 
@@ -320,10 +346,8 @@ class HomeController extends Controller
             $growthData[] = $monthGrowrate[$i] ?? 0; // ถ้าเดือนไหนไม่มี ให้ใส่ 0
         }
 
-        $maxSales = max($monthlySales);
-        $minSales = min($monthlySales);
 
-        //$medianOrder = $this->calculateMedian($monthlySales);
+
 
 
 

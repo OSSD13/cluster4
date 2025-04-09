@@ -244,8 +244,12 @@
 @endsection
 
 @section('scripts')
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+        // ลงทะเบียน plugin กับ Chart.js
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
     <script>
+        // Chart.register(ChartDataLabels);
         // allOrder Graph
         const monthlySales = @json($monthlySales);
         const monthlySalesOnly = @json(array_values($monthlySales));
@@ -260,12 +264,6 @@
 
 
 
-
-
-
-
-
-
         const salesChart = new Chart(ctxOrder, {
 
             data: {
@@ -276,7 +274,7 @@
                         label: 'ยอดขายของสาขา',
                         type: 'line',
                         data: monthlySalesOnly, // ยอดขายแต่ละเดือนที่ส่งมาจาก Controller
-                        borderColor: 'rgba(0, 0, 255, 1)',
+                        borderColor: 'rgba(77, 85, 160, 1)',
                         backgroundColor: 'rgba(54, 79, 199, 0.8)',
                         borderWidth: 2,
                         pointRadius: 4,
@@ -331,7 +329,8 @@
                             usePointStyle: true, //  ให้ใช้ pointStyle แทน box
                             pointStyle: 'circle' // เลือกเป็นวงกลม
                         }
-                    }
+                    },
+
                 },
                 scales: {
                     y: {
@@ -352,18 +351,18 @@
                                 //return '';
                             }
                         },
-                        grid: {
-                            drawTicks: true,
-                            drawOnChartArea: true,
-                            color: function(context) {
-                                const tickValue = context.tick.value;
-                                const allowedTicks = [1, 1000, 10000, 100000, 1000000, maxY];
-                                if (allowedTicks.includes(tickValue)) {
-                                    return 'rgba(0, 0, 0, 0.1)';
-                                }
-                                return 'transparent';
-                            }
-                        }
+                        // grid: {
+                        //     drawTicks: true,
+                        //     drawOnChartArea: true,
+                        //     color: function(context) {
+                        //         const tickValue = context.tick.value;
+                        //         const allowedTicks = [1, 1000, 10000, 100000, 1000000, maxY];
+                        //         if (allowedTicks.includes(tickValue)) {
+                        //             return 'rgba(0, 0, 0, 0.1)';
+                        //         }
+                        //         return 'transparent';
+                        //     }
+                        // }
                     },
                     x: {
                         ticks: {
@@ -429,6 +428,7 @@
     </script>
 
     <script>
+        // Chart.register(ChartDataLabels);
         const ctxsales = document.getElementById('growthChart').getContext('2d');
         const growthChart = new Chart(ctxsales, {
             type: 'line',
@@ -456,7 +456,25 @@
                 plugins: {
                     legend: {
                         display: false
-                    }
+                    },
+                    // datalabels: {
+                    //     // จัดการการแสดงผลของตัวเลขบนแต่ละจุด
+                    //     align: 'top', // ตำแหน่งของตัวเลข
+                    //     anchor: 'end', // แนวการยึด
+                    //     color: 'black', // สีของตัวเลข
+                    //     font: {
+                    //         weight: 'bold',
+                    //         size: 10 // ขนาดตัวเลข
+                    //     },
+                    //     formatter: function(value, context) {
+                    //         // ตั้งค่าการแสดงผลของตัวอักษรตามสีของเส้น
+                    //         return value.toLocaleString(); // แสดงตัวเลขพร้อมคอมม่า
+                    //     },
+                    //     color: function(context) {
+                    //         // เปลี่ยนสีของตัวอักษรให้ตรงกับสีของเส้น (borderColor)
+                    //         return context.dataset.borderColor;
+                    //     }
+                    // }
                 },
                 scales: {
                     y: {
@@ -543,7 +561,25 @@
                 plugins: {
                     legend: {
                         display: false
-                    }
+                    },
+                    // datalabels: {
+                    //     // จัดการการแสดงผลของตัวเลขบนแต่ละจุด
+                    //     align: 'top', // ตำแหน่งของตัวเลข
+                    //     anchor: 'end', // แนวการยึด
+                    //     color: 'black', // สีของตัวเลข
+                    //     font: {
+                    //         weight: 'bold',
+                    //         size: 10 // ขนาดตัวเลข
+                    //     },
+                    //     formatter: function(value, context) {
+                    //         // ตั้งค่าการแสดงผลของตัวอักษรตามสีของเส้น
+                    //         return value.toLocaleString(); // แสดงตัวเลขพร้อมคอมม่า
+                    //     },
+                    //     color: function(context) {
+                    //         // เปลี่ยนสีของตัวอักษรให้ตรงกับสีของเส้น (borderColor)
+                    //         return context.dataset.borderColor;
+                    //     }
+                    // }
                 }
             }
         });
