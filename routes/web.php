@@ -57,10 +57,8 @@ Route::get('/cluster4/branchMyMap', [branchController::class, 'index'])->name('b
 
 Route::get('/cluster4/map', MapLocation::class)->name('map');
 
-
+//ice
 Route::get('/cluster4/order-detail/{br_id}', [OrderController::class, 'order_detail'])->name('orderDetail');
-Route::get('/cluster4/branch-detail/{br_id}', [BranchController::class, 'branch_detail'])->name('branchDetail');
-Route::get('/cluster4/edit-branch-detail/{br_id},{br_mount}', [BranchController::class, 'branch_detail'])->name('branchDetail');
 
 
 Route::get('/cluster4/order', [OrderController::class, 'index'])->name('order');

@@ -26,7 +26,7 @@ class OrderController extends Controller
 
     public function order_detail($br_id)
     {
-        $thaiYear = Carbon::now()->year + 543;  // ปีปัจจุบัน (พ.ศ.)
+        $thaiYear = Carbon::now()->year + 543;  
         $branch = Branch::findOrFail($br_id);
         $user = User::findOrFail($branch->br_us_id);
 
@@ -34,7 +34,6 @@ class OrderController extends Controller
         $orderData = $this->formatOrderData($monthlyOrders);
         $medain = $this->monthlyMedianOrder($thaiYear);
         $growthRate = $this-> growthRateCalculate($br_id, $thaiYear);
-        
         return view('orderDetail', [
             'branch'     => $branch,
             'user'       => $user,
@@ -43,8 +42,7 @@ class OrderController extends Controller
             'monthMap'   => $this->monthMap,
             'thisyear'   => $thaiYear,
             'medain'     => $medain,
-            'growthRate' => $growthRate, 
-            // dd($growthRate),
+            'growthRate' => $growthRate,
         ]);
     }
     private function getMonthlyOrder(int $branchId, int $year)
@@ -134,7 +132,6 @@ class OrderController extends Controller
                 $monthlyMedian[$month] = 1;
             }
         }
-    
         return $monthlyMedian;
     }
 
@@ -187,10 +184,21 @@ class OrderController extends Controller
             
         
             return $percent;
+        }
+
+         // ยอดขายปีนี้
+        private function totalSales(int $branchId, int $year)
+        {
+            return DB::table('order')
+                ->where('od_year', $year)
+                ->where('od_br_id', $branchId)
+                ->sum('od_amount');
+        }
+
 
     }
 
-}
+
 
 
 
