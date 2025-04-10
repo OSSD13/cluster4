@@ -6,7 +6,7 @@
             <div class="mb-4 px-4">
                 <div class="text-white text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
                     style="background-color: #4D55A0;">
-                    <a href="{{ route('team') }}">
+                    <a href="{{ route('salesTeamMyMap') }}">
                         <i class="fa-solid fa-arrow-left mx-3"></i>
                     </a>
                     รายชื่อทีมงาน

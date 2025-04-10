@@ -94,8 +94,15 @@ class ReportSalesSupervisorController extends Controller
             return [$month => $orderData->get($month, 0)];
         });
 
-        // ค่ามัธยฐานยอดขายรายเดือน
-        $medain = array_fill(0, 12, $completeOrderData->median());
+        $medain = collect($orders)
+            ->groupBy('od_month')
+            ->map(function ($ordersInMonth) {
+                return $ordersInMonth->pluck('od_amount')->median();
+            });
+
+        $medain = collect($thaiMonths)->mapWithKeys(function ($month) use ($medain) {
+            return [$month => $medain->get($month, 0)];
+        });
 
         foreach ($orders as $order) {
             $monthIndex = ($monthMap[$order->od_month] ?? 0) + 1;
@@ -293,8 +300,16 @@ class ReportSalesSupervisorController extends Controller
             return [$month => $orderData->get($month, 0)];
         });
 
-        // ค่ามัธยฐานยอดขายรายเดือน
-        $medain = array_fill(0, 12, $completeOrderData->median());
+        // ค่ามัธยฐานของยอดขายในแต่ละเดือน
+        $medain = collect($orders)
+            ->groupBy('od_month')
+            ->map(function ($ordersInMonth) {
+                return $ordersInMonth->pluck('od_amount')->median();
+            });
+
+        $medain = collect($thaiMonths)->mapWithKeys(function ($month) use ($medain) {
+            return [$month => $medain->get($month, 0)];
+        });
 
         // ยอดขายแต่ละสาขา
         $branchSales = [];

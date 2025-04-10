@@ -86,7 +86,7 @@
             <div>
                 <div class="flex flex-col items-center">
                     <i class="fa-solid fa-warehouse text-4xl" style="color: #4d55a0;"></i>
-                    <a href="{{ url('#') }}">
+                    <a href="{{ route('reportSalesTeam') }}">
                         <button class="btn btn-warning text-[#4169E1]">ดูเพิ่มเติม</button>
                     </a>
                 </div>
@@ -102,7 +102,7 @@
             <div>
                 <div class="flex flex-col items-center">
                     <i class="fa-solid fa-users text-4xl" style="color: #4d55a0;"></i>
-                    <a href="{{ url('#') }}">
+                    <a href="{{ route('salesTeamMyMap') }}">
                         <button class="btn btn-warning text-[#4169E1]">ดูเพิ่มเติม</button>
                     </a>
                 </div>
@@ -118,7 +118,7 @@
     <script>
         const monthlySales = @json($completeOrderData->values()); // ข้อมูลยอดขายรายเดือน
         const labels = @json($thaiMonths); // ชื่อเดือนที่ใช้เป็น labels สำหรับกราฟ
-        const monthlyMedian = @json(array_values($medain)); // ค่ามัธยฐานสำหรับกราฟ
+        const monthlyMedian = @json(array_values($medain->toArray())); // ค่ามัธยฐานสำหรับกราฟ
 
         const ctxOrder = document.getElementById('orderTotalChart').getContext('2d');
 
