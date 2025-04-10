@@ -86,7 +86,7 @@
             <div>
                 <div class="flex flex-col items-center">
                     <i class="fa-solid fa-warehouse text-4xl" style="color: #4d55a0;"></i>
-                    <a href="{{ url('#') }}">
+                    <a href="{{ route('branchMyMap.team', $branchIds) }}">
                         <button class="btn btn-warning text-[#4169E1]">ดูเพิ่มเติม</button>
                     </a>
                 </div>
@@ -102,7 +102,7 @@
             <div>
                 <div class="flex flex-col items-center">
                     <i class="fa-solid fa-users text-4xl" style="color: #4d55a0;"></i>
-                    <a href="{{ url('#') }}">
+                    <a href="{{ route('salesTeamMyMap') }}">
                         <button class="btn btn-warning text-[#4169E1]">ดูเพิ่มเติม</button>
                     </a>
                 </div>

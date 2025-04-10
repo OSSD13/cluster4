@@ -121,7 +121,8 @@ class ReportSalesSupervisorController extends Controller
             'quarterSales',
             'completeOrderData',
             'thaiMonths',
-            'medain'
+            'medain',
+            'branchIds'
         ));
     }
 

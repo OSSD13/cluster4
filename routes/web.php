@@ -67,6 +67,7 @@ Route::middleware([CheckGoogleLogin::class])->group(
 
         //CEO
         Route::get('/branchMyMap', [BranchController::class, 'index'])->name('branchMyMap');
+        Route::get('/branchMyMap-team', [BranchController::class, 'index_team'])->name('branchMyMap.team');
 
 
         //Sales Supervisor

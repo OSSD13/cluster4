@@ -124,7 +124,7 @@
             <div class="mb-4 px-4">
                 <div class="text-white text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
                     style="background-color: #4D55A0;">
-                    <a href="#" class="mx-3">
+                    <a href="{{ route('report_SalesSupervisor') }}" class="mx-3">
                         <i class="fa-solid fa-arrow-left fa-l"></i>
                     </a>
                     รายชื่อทีมงาน
