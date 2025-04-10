@@ -1,13 +1,16 @@
 @extends('layouts.default')
+
 @section('content')
-    <div class="w-full mx-auto mt-16 space-y-6 px-6">
-        <div class="mb-2 px-4">
-            <label
-                class="bg-[#4D55A0] text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full pl-4">
-                รายงานทั้งหมด
+    <div class="pt-16 bg-white min-h-screen px-4 space-y-4 mb-16">
+
+        {{-- หัวข้อ --}}
+        <div>
+            <label class="bg-[#4D55A0] text-white text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full pl-4">
+                รายงาน
             </label>
         </div>
-        <!-- เมนูแท็บ -->
+
+        {{-- Tabs --}}
         <div class="flex justify-between text-sm font-medium text-center text-gray-500 border-b border-gray-200">
             <a class="w-1/2 py-2 border-b-2 border-[#4D55A0] text-[#4D55A0] font-semibold">
                 สาขาของฉัน
@@ -16,206 +19,224 @@
                 สาขาพนักงาน
             </a>
         </div>
-        <div id="content-my" class="tab-content mt-4">
-            <div class="flex justify-between items-center px-6">
-                <!-- ฝั่งซ้าย -->
-                <h1 class="text-3xl font-bold">ยอดรวมของปี {{ $selectedSupYear }}</h1>
 
-                <!-- ฝั่งขวา: ปุ่ม dropdown -->
-                <div class="relative inline-block text-left w-[120px]" x-data="{ open: false }">
-                    <button type="button" @click="open = !open"
-                        class="inline-flex w-full justify-between items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 ring-1 shadow-xs ring-gray-300 ring-inset hover:bg-gray-50"
-                        id="menu-button" aria-expanded="true" aria-haspopup="true">
-                        {{ $selectedSupYear }}
-                        <svg class="ml-2 size-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path fill-rule="evenodd"
-                                d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div x-show="open" @click.away="open = false"
-                        class="absolute right-0 z-10 mt-2 w-full origin-top-right rounded-md bg-white ring-1 shadow-lg ring-black/5 focus:outline-none"
-                        role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-                        <div class="py-1" role="none">
-                            @foreach ($allYears as $year)
-                                <a href="{{ route('report_SalesSupervisor', ['year' => $year]) }}"
-                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" role="menuitem"
-                                    tabindex="-1">
-                                    {{ $year }}
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-                </div>
+        {{-- ยอดรวม --}}
+        <div class="flex justify-between items-center mb-2">
+            <h2 class="text-lg font-bold">ยอดรวม</h2>
 
+            {{-- เลือกปี --}}
+            <form method="GET" action="{{ route('report_SalesSupervisor') }}">
+                <select name="year"
+                    class="text-sm font-semibold px-4 py-1 rounded-md border border-[#CAC4D0] focus:outline-none"
+                    onchange="this.form.submit()">
+                    @for ($y = 2566; $y <= now()->year + 543; $y++)
+                        <option value="{{ $y }}" {{ $y == $year ? 'selected' : '' }}>ปี {{ $y }}
+                        </option>
+                    @endfor
+                </select>
+            </form>
+        </div>
+
+        {{-- กล่องยอดขาย --}}
+        <div class="bg-white shadow-md rounded-2xl p-4 flex justify-between items-center border border-gray-200">
+            <div>
+                <p class="text-sm text-gray-600">ยอดขายรวมทั้งหมดของฉันในปี {{ $year }}</p>
+                <p class="text-2xl font-bold text-gray-800">
+                    {{ number_format($totalSales) }} ชิ้น
+                    {{-- ถ้าจะเพิ่มเปอร์เซ็นต์เติบโต ก็ใส่ <span> ตรงนี้ได้ --}}
+                </p>
+                {{-- ถ้าอยากแสดงค่าเฉลี่ยรายเดือน: --}}
+                <p class="text-sm mt-1 text-[#4169E1]">
+                    ค่าเฉลี่ยรายเดือนอยู่ที่ {{ number_format($totalSales / 12, 2) }} ชิ้น
+                </p>
             </div>
-            <hr class="my-3">
-            <div class="mb-4 px-4">
-                <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-gray-500">ยอดรวมทั้งหมดของปี {{ $selectedSupYear }}</p>
-                            <div class="text-3xl font-bold my-3 flex items-center">
-                                <span>{{ number_format($totalSalesSup) }} ชิ้น</span>
-                                @if ($growthPercentage > 0)
-                                    <span class="ml-4 text-sm text-green-600">
-                                        + {{ number_format($growthPercentage) }}%
-                                    @elseif ($growthPercentage < 0)
-                                        <span class="ml-4 text-sm text-red-600">
-                                            - {{ number_format(abs($growthPercentage)) }}%
-                                        @else
-                                            <span class="ml-4 text-sm text-gray-600">0%</span>
-                                @endif
-                            </div>
-                            <p class="text-sm">ค่าเฉลี่ยรายเดือนอยู่ที่ {{ number_format($averageSales) }} ชิ้น</p>
-                        </div>
-                    </div>
-
-                    <div class="p-4 rounded-full">
-                        <i class="fa-solid fa-box fa-2xl" style="color: #4d55a0;"></i>
-                    </div>
-                </div>
+            <div class="text-2xl">
+                <i class="fa-solid fa-box fa-2xl" style="color: #4d55a0"></i>
             </div>
         </div>
-        <div class="flex justify-between items-center px-4">
-            <!-- ฝั่งซ้าย -->
-            <h1 class="text-3xl font-bold">กราฟยอดขายปี {{ $selectedSupYear }}</h1>
+
+        {{-- หัวข้อกราฟ --}}
+        <div class="flex justify-between items-center mt-6">
+            <h3 class="text-md font-bold">กราฟยอดขาย</h3>
         </div>
-        <!-- กราฟเส้น -->
-        <div class="mb-4 px-4">
-            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow">
-                <p class="font-semibold text-lg mb-4">ยอดขายในปีนี้</p>
-                <div class="w-full h-[300px] sm:h-[350px] md:h-[400px] lg:h-[450px]">
-                    <canvas id="salesChart" class="w-full h-full max-w-full max-h-full"></canvas>
-                </div>
+
+        {{-- กราฟ --}}
+        <div class="bg-white rounded-lg shadow p-4" style="height: auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-md font-bold">ยอดขายของฉันในปีนี้</h3>
+            </div>
+            <div class="w-full h-[400px]">
+                <canvas id="orderTotalChart"></canvas>
             </div>
         </div>
-        <div class="mb-4 px-4">
-            <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow">
-                <div class="flex justify-between items-center px-4">
-                    <div class="flex-1">
-                        <p class="text-gray-500">จำนวนสาขาทั้งหมด</p>
-                        <p class="text-3xl font-bold">{{ number_format($branchCount) }} สาขา</p>
-                        <p class="text-green-600 text-sm">จำนวนสาขาเพิ่มขึ้นเฉลี่ย {{ $branchPercen }}%</p>
-                    </div>
-                    <div class="flex flex-col items-center ml-auto">
-                        <i class="fa-solid fa-warehouse mt-3 fa-2xl" style="color: #4D55A0;"></i>
-                        <a href="{{ route('branchMyMap') }}" class="text-blue-600 font-sm hover:text-blue-700 mt-7">
-                            ดูเพิ่มเติม
-                        </a>
-                    </div>
-                </div>
+
+        {{-- กล่องจำนวนสาขา --}}
+        <div class="bg-white shadow-md rounded-2xl p-4 border border-gray-200">
+            <div class="flex justify-between items-center">
                 <div>
-                    <hr class="my-3">
-                    <div class="flex justify-between">
-                        <p class="text-gray-500">ยอดขายรวมมากที่สุด {{ $selectedSupYear }}</p>
-                        <p class="text-gray-500">จากปีที่แล้ว</p>
-                    </div>
-                    <ul>
-                        @foreach ($branchesRank as $index => $branch)
-                            <li class="flex justify-between items-center py-2">
-                                <span class="flex-1 text-left font-bold text-sm">สาขาที่ {{ $branch->br_id }}</span>
-                                <span
-                                    class="flex-1 text-center font-bold text-sm">{{ number_format($branch->total_sales, 2) }}
-                                    ชิ้น</span>
-                                <span class="flex-1 text-right font-bold text-sm">
-                                    {{ number_format($branch->growth_percentage, 2) }}%
-                                </span>
-                            </li>
-                        @endforeach
-                    </ul>
+                    <p class="text-sm">จำนวนสาขา</p>
+                    <p class="text-2xl text-gray-800">{{ $branchCount }} สาขา</p>
+                    <p class="text-sm mt-1" style="color: #279C27">จำนวนสาขาเพิ่มขึ้นเฉลี่ย {{ $branchGrowthPercent }} %</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fa-solid fa-warehouse text-4xl" style="color: #4d55a0;"></i>
+                    <a href="{{ route('branchMyMap') }}">
+                        <button class="btn btn-warning text-[#4169E1]">ดูเพิ่มเติม</button>
+                    </a>
                 </div>
             </div>
+
+            <div class="mt-4 border-t border-gray-200 pt-4">
+
+                <div class="flex justify-between items-center mb-2">
+                    <p class="text-md">ยอดขายรวมมากที่สุด (ภายในปี)</p>
+                    <p class="text-md text-right">จากปีที่แล้ว</p>
+                </div>
+
+                <div class="space-y-2">
+                    @foreach ($branchSales as $index => $branch)
+                        <div class="flex justify-between items-center">
+                            <!-- สาขาอยู่ซ้าย -->
+                            <p class="font-bold w-1/3">{{ 'สาขาที่ ' . ($index + 1) }}</p>
+
+                            <!-- ยอดขายอยู่กลาง -->
+                            <div class="w-1/3 text-center">
+                                <p class="text-lg font-semibold">{{ number_format($branch['sales']) }} ชิ้น</p>
+                            </div>
+
+                            <!-- % อยู่ขวา -->
+                            <div class="w-1/3 text-right {{ $branch['growth'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                <span class="font-semibold">{{ $branch['growth'] >= 0 ? '+' : '' }}{{ $branch['growth'] }}
+                                    %</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+
         </div>
+
     </div>
 @endsection
 
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@1.4.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
     <script>
-        const monthlyTotal = @json($monthlyTotal); // ส่งข้อมูลของยอดขาย
-        const monthlyMedian = @json($monthlyMedian); // ส่งข้อมูลของ Median
-        const monthMap = @json($monthMap);
-        const ctxbar = document.getElementById('salesChart').getContext('2d');
+        const monthlySales = @json($completeOrderData->values()); // ข้อมูลยอดขายรายเดือน
+        const labels = @json($thaiMonths); // ชื่อเดือนที่ใช้เป็น labels สำหรับกราฟ
+        const monthlyMedian = @json(array_values($medain->toArray())); // ค่ามัธยฐานสำหรับกราฟ
 
-        const salesData = {
-            labels: monthMap, // ใช้ $monthMap เพื่อแสดงชื่อเดือน
-            datasets: [{
-                    label: 'ยอดขาย',
-                    data: monthlyTotal, // ยอดขายในแต่ละเดือน
-                    backgroundColor: 'rgba(54,79,199,0.8)',
-                    borderColor: 'rgba(0,0,255,1)',
-                    borderWidth: 2,
-                    pointRadius: 4,
-                    fill: false,
-                    tension: 0.3
-                },
-                {
-                    label: 'ค่า Median ของยอดขาย',
-                    data: monthlyMedian, // ค่า median ของยอดขาย
-                    borderColor: 'rgba(255,99,132,1)',
-                    backgroundColor: 'rgba(255,99,132,0.2)',
-                    borderWidth: 2,
-                    fill: false,
-                    pointRadius: 4,
-                    tension: 0.3,
-                    borderDash: [5, 5] // เส้นประ
-                }
-            ]
-        };
+        const ctxOrder = document.getElementById('orderTotalChart').getContext('2d');
 
-        const config = {
+        // หาค่ามากสุดจากยอดขายในเดือนต่างๆ
+        const maxSales = Math.max(...Object.values(monthlySales));
+        const maxValue = Math.pow(10, Math.ceil(Math.log10(maxSales)));
+
+        const salesChart = new Chart(ctxOrder, {
             type: 'line',
-            data: salesData,
+            data: {
+                labels: labels,
+                datasets: [{
+                        label: 'ยอดขายในเดือนนี้',
+                        type: 'line',
+                        data: Object.values(monthlySales),
+                        borderColor: 'rgba(54, 79, 199, 0.8)',
+                        backgroundColor: 'rgba(54, 79, 199, 0.8)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        tension: 0.3,
+                        spanGaps: true,
+                        pointStyle: 'circle',
+                        order: 1
+                    },
+                    {
+                        label: 'ค่ามัธยฐาน',
+                        type: 'line',
+                        data: Object.values(monthlyMedian),
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 2,
+                        pointRadius: 4,
+                        tension: 0.3,
+                        spanGaps: true,
+                        pointStyle: 'circle',
+                        order: 2
+                    }
+                ]
+            },
             options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                responsive: true, // ยืดหยุ่นตามขนาดหน้าจอ
+                maintainAspectRatio: false, // คงอัตราส่วนของกราฟ
+                layout: {
+                    padding: {
+                        top: 20, // เพิ่ม padding ด้านบนเพื่อไม่ให้กราฟถูกตัด
+                        bottom: 20 // เพิ่ม padding ด้านล่างเพื่อไม่ให้กราฟถูกตัด
+                    }
+                },
                 plugins: {
                     legend: {
-                        position: 'top',
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return tooltipItem.raw + ' ชิ้น';
-                            }
-                        }
-                    },
-                    datalabels: {
-                        anchor: 'center',
-                        align: 'center',
-                        formatter: function(value) {
-                            return value;
-                        },
-                        color: '#FFFFFF',
-                        font: {
-                            weight: 'bold',
-                            size: 12
-                        }
+                        display: false // ไม่แสดง legend ในกราฟ
                     }
                 },
                 scales: {
-                    x: {
-                        title: {
-                            display: true,
+                    y: {
+                        beginAtZero: true,
+                        type: 'linear',
+                        min: 0,
+                        ticks: {
+                            autoSkip: false,
+                            stepSize: Math.ceil(maxSales / 10),
+                            callback: function(value) {
+                                return Math.floor(value).toLocaleString(); // แสดงตัวเลขเต็ม (ไม่มีทศนิยม)
+                            }
+                        },
+                        grid: {
+                            drawTicks: true,
+                            drawOnChartArea: true,
+                            color: 'rgba(0, 0, 0, 0.1)'
                         }
                     },
-                    y: {
-                        title: {
-                            display: true,
+                    x: {
+                        ticks: {
+                            autoSkip: false
                         },
-                        beginAtZero: true
+                        grid: {
+                            drawOnChartArea: false,
+                            color: 'rgba(0, 0, 0, 0.1)' // เพิ่มความเข้มของเส้นแนวตั้งแต่ละเดือน
+                        }
                     }
                 }
-            },
-            plugins: [ChartDataLabels]
-        };
+            }
+        });
 
-        const salesChart = new Chart(ctxbar, config);
+        // สร้าง custom legend ที่ฝั่งขวาระดับเดียวกับหัวข้อ
+        const legendContainer = document.querySelector('.flex.justify-between.items-center.mb-4');
+        if (legendContainer) {
+            // สร้าง element ใหม่สำหรับ legend
+            const legendElement = document.createElement('div');
+            legendElement.className = 'flex items-center gap-4';
+
+            // เพิ่ม legend สำหรับแต่ละ dataset
+            salesChart.data.datasets.forEach(dataset => {
+                const color = dataset.backgroundColor || dataset.borderColor;
+                const legendItem = document.createElement('div');
+                legendItem.className = 'flex items-center gap-1';
+                legendItem.innerHTML = `
+                <span class="w-3 h-3 rounded-full inline-block" style="background-color: ${typeof color === 'object' ? color : color};"></span>
+                <span class="text-sm">${dataset.label}</span>
+            `;
+                legendElement.appendChild(legendItem);
+            });
+
+            // แทนที่หรือเพิ่ม legend ไปที่ container
+            const existingLegend = legendContainer.querySelector('.custom-legend');
+            if (existingLegend) {
+                legendContainer.replaceChild(legendElement, existingLegend);
+            } else {
+                legendContainer.appendChild(legendElement);
+            }
+        }
     </script>
-@endsection
-
-@section('styles')
 @endsection

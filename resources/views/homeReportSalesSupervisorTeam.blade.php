@@ -118,7 +118,7 @@
     <script>
         const monthlySales = @json($completeOrderData->values()); // ข้อมูลยอดขายรายเดือน
         const labels = @json($thaiMonths); // ชื่อเดือนที่ใช้เป็น labels สำหรับกราฟ
-        const monthlyMedian = @json(array_values($medain)); // ค่ามัธยฐานสำหรับกราฟ
+        const monthlyMedian = @json(array_values($medain->toArray())); // ค่ามัธยฐานสำหรับกราฟ
 
         const ctxOrder = document.getElementById('orderTotalChart').getContext('2d');
 
