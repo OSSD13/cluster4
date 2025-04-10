@@ -51,7 +51,7 @@
         src="https://earthchie.github.io/jquery.Thailand.js/jquery.Thailand.js/dist/jquery.Thailand.min.js"></script>
 
 
-    <link rel="stylesheet" href="./public/css/style.css">
+    <link rel="stylesheet" href="/public/css/style.css">
 
     @yield('styles')
 </head>

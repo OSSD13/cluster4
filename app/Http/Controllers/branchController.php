@@ -8,12 +8,278 @@ use App\Models\Branch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 class BranchController extends Controller
 {
     public function index(Request $request)
     {
+        $userRole = Auth::user()->us_role;
 
+        if (Auth::check() && Auth::user()->us_role === 'CEO') {
+            // รับค่าจากผู้ใช้ใช้งาน
+
+            $sort = $request->get('sort', 'desc'); // sort เรียงยอดขายจากมากไปน้อยหรือน้อยไปมาก โดยที่ค่าเริ่มต้นคือมากไปน้อย
+            $search = $request->input('search'); // ค้นหาจากที่ผู้ใช้งานกรอก
+            $province = $request->get('province'); // จังหวัดที่ใช้กรอก
+            $perPage = 5; // ต้องการโชว์แค่ 5 สาขาต่อหน้า
+            $page = $request->input('page', 1); // หน้าปัจจุบันที่แสดงผล
+
+            // ตรวจสอบว่ามีการระบุรหัสสาขา
+            if ($request->has('br_id')) {
+                $branch = Branch::with('branch', 'manager')->where('br_id', $request->get('br_id'))->first();
+
+                if (!$branch) {
+                    return redirect()->back()->with('error', 'ไม่พบข้อมูลสาขานี้');
+                }
+            }
+
+            // ดึงข้อมูลสาขา
+            $branchesQuery = Branch::withoutTrashed() //withTrashed() โหลดข้อมูลแม้แต่สาขาที่ถูก soft delete
+                ->with([
+                    'manager',
+                    'order',
+                    'image' => fn($query) => $query->latest()->limit(1)
+                ])
+                // สามารค้นหาจากรหัสสาขา ชื่อสาขา หรือจังหวัด
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('br_code', 'LIKE', "{$search}%")
+                            ->orWhere('br_name', 'LIKE', "{$search}%")
+                            ->orWhere('br_province', 'LIKE', "{$search}%")
+                            ->orWhereHas('manager', function ($mq) use ($search) {
+                                $mq->where('us_fname', 'LIKE', "{$search}%")
+                                    ->orWhere('us_lname', 'LIKE', "{$search}%")
+                                    ->orWhereRaw("CONCAT(us_fname, ' ', us_lname) LIKE ?", ["{$search}%"]);
+                            });
+                    });
+                })
+                //ถ้าผู้ใช้งานเลือกจังหวัดที่ต้องการดู ระบบจะแสดงแค่จังหวัดนั้น
+                ->when($province, fn($query) => $query->where('br_province', $province));
+
+            // คำนวณยอดขายและดึงรูปล่าสุดของผู้ใช้งาน
+            $branches = $branchesQuery->get()->map(function ($branch) {
+                $branch->total_sales = $branch->order()
+                    ->whereYear('created_at', now()->year)
+                    ->sum('od_amount');
+
+                $branch->latest_image = $branch->image->first();
+                return $branch;
+            });
+
+            // เรียงลำดับยอดขาย
+            $branches = $sort === 'asc'
+                ? $branches->sortBy('total_sales')->values()
+                : $branches->sortByDesc('total_sales')->values();
+
+            // นับจำนวนสาขาทั้งหมดจากการค้นหาหรือตัวกรองที่ผู้ใช้งานเลือก
+            $totalBranches = $branches->count();
+            $totalPages = ceil($totalBranches / $perPage);
+
+            // ตรวจสอบความถูกต้องของหน้า
+            if ($page < 1) {
+                $page = 1;
+            } else if ($page > $totalPages && $totalPages > 0) {
+                $page = $totalPages;
+            }
+
+            // แสดงเฉพาะข้อมูลในหน้าปัจจุบัน
+            $offset = ($page - 1) * $perPage;
+            $paginatedBranches = $branches->slice($offset, $perPage);
+
+            // กำหนดลำดับเลขหน้าของแต่ละสาขา
+            foreach ($paginatedBranches as $index => $branch) {
+                $branch->branch_number = $offset + $index + 1;
+            }
+
+            return view('branchMyMap', compact('paginatedBranches', 'sort', 'province', 'totalPages', 'page', 'search', 'userRole'));
+        } elseif (Auth::check() && Auth::user()->us_role === 'Sales Supervisor') {
+
+            $currentUserId = Auth::user()->us_id;
+
+            // ดึงรายชื่อ user ที่มี us_head = คนที่ login
+            $branchIds = Branch::where('br_us_id', $currentUserId)
+                ->whereNull('deleted_at')
+                ->pluck('br_id');
+
+            // รับค่าจากผู้ใช้ใช้งาน
+
+            $sort = $request->get('sort', 'desc'); // sort เรียงยอดขายจากมากไปน้อยหรือน้อยไปมาก โดยที่ค่าเริ่มต้นคือมากไปน้อย
+            $search = $request->input('search'); // ค้นหาจากที่ผู้ใช้งานกรอก
+            $province = $request->get('province'); // จังหวัดที่ใช้กรอก
+            $perPage = 5; // ต้องการโชว์แค่ 5 สาขาต่อหน้า
+            $page = $request->input('page', 1); // หน้าปัจจุบันที่แสดงผล
+
+            // ตรวจสอบว่ามีการระบุรหัสสาขา
+            if ($request->has('br_id')) {
+                $branch = Branch::with('branch', 'manager')->where('br_id', $request->get('br_id'))->first();
+
+                if (!$branch) {
+                    return redirect()->back()->with('error', 'ไม่พบข้อมูลสาขานี้');
+                }
+            }
+
+            // ดึงข้อมูลสาขา
+            $branchesQuery = Branch::withoutTrashed() //withTrashed() โหลดข้อมูลแม้แต่สาขาที่ถูก soft delete
+                ->with([
+                    'manager',
+                    'order',
+                    'image' => fn($query) => $query->latest()->limit(1)
+                ])
+                // สามารค้นหาจากรหัสสาขา ชื่อสาขา หรือจังหวัด
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('br_code', 'LIKE', "{$search}%")
+                            ->orWhere('br_name', 'LIKE', "{$search}%")
+                            ->orWhere('br_province', 'LIKE', "{$search}%")
+                            ->orWhereHas('manager', function ($mq) use ($search) {
+                                $mq->where('us_fname', 'LIKE', "{$search}%")
+                                    ->orWhere('us_lname', 'LIKE', "{$search}%")
+                                    ->orWhereRaw("CONCAT(us_fname, ' ', us_lname) LIKE ?", ["{$search}%"]);
+                            });
+                    });
+                })
+                //ถ้าผู้ใช้งานเลือกจังหวัดที่ต้องการดู ระบบจะแสดงแค่จังหวัดนั้น
+                ->when($province, fn($query) => $query->where('br_province', $province));
+
+            // คำนวณยอดขายและดึงรูปล่าสุดของผู้ใช้งาน
+            $branches = $branchesQuery->wherein('br_id', $branchIds)->get()->map(function ($branch) {
+                $branch->total_sales = $branch->order()
+                    ->whereYear('created_at', now()->year)
+                    ->sum('od_amount');
+
+                $branch->latest_image = $branch->image->first();
+                return $branch;
+            });
+
+            // เรียงลำดับยอดขาย
+            $branches = $sort === 'asc'
+                ? $branches->sortBy('total_sales')->values()
+                : $branches->sortByDesc('total_sales')->values();
+
+            // นับจำนวนสาขาทั้งหมดจากการค้นหาหรือตัวกรองที่ผู้ใช้งานเลือก
+            $totalBranches = $branches->count();
+            $totalPages = ceil($totalBranches / $perPage);
+
+            // ตรวจสอบความถูกต้องของหน้า
+            if ($page < 1) {
+                $page = 1;
+            } else if ($page > $totalPages && $totalPages > 0) {
+                $page = $totalPages;
+            }
+
+            // แสดงเฉพาะข้อมูลในหน้าปัจจุบัน
+            $offset = ($page - 1) * $perPage;
+            $paginatedBranches = $branches->slice($offset, $perPage);
+
+            // กำหนดลำดับเลขหน้าของแต่ละสาขา
+            foreach ($paginatedBranches as $index => $branch) {
+                $branch->branch_number = $offset + $index + 1;
+            }
+
+            return view('branchMyMap', compact('paginatedBranches', 'sort', 'province', 'totalPages', 'page', 'search', 'userRole'));
+        } else {
+
+            $currentUserId = Auth::user()->us_id;
+
+            // ดึงรายชื่อ user ที่มี us_head = คนที่ login
+            $branchIds = Branch::where('br_us_id', $currentUserId)
+                ->whereNull('deleted_at')
+                ->pluck('br_id');
+
+            // รับค่าจากผู้ใช้ใช้งาน
+
+            $sort = $request->get('sort', 'desc'); // sort เรียงยอดขายจากมากไปน้อยหรือน้อยไปมาก โดยที่ค่าเริ่มต้นคือมากไปน้อย
+            $search = $request->input('search'); // ค้นหาจากที่ผู้ใช้งานกรอก
+            $province = $request->get('province'); // จังหวัดที่ใช้กรอก
+            $perPage = 5; // ต้องการโชว์แค่ 5 สาขาต่อหน้า
+            $page = $request->input('page', 1); // หน้าปัจจุบันที่แสดงผล
+
+            // ตรวจสอบว่ามีการระบุรหัสสาขา
+            if ($request->has('br_id')) {
+                $branch = Branch::with('branch', 'manager')->where('br_id', $request->get('br_id'))->first();
+
+                if (!$branch) {
+                    return redirect()->back()->with('error', 'ไม่พบข้อมูลสาขานี้');
+                }
+            }
+
+            // ดึงข้อมูลสาขา
+            $branchesQuery = Branch::withoutTrashed() //withTrashed() โหลดข้อมูลแม้แต่สาขาที่ถูก soft delete
+                ->with([
+                    'manager',
+                    'order',
+                    'image' => fn($query) => $query->latest()->limit(1)
+                ])
+                // สามารค้นหาจากรหัสสาขา ชื่อสาขา หรือจังหวัด
+                ->when($search, function ($query, $search) {
+                    $query->where(function ($q) use ($search) {
+                        $q->where('br_code', 'LIKE', "{$search}%")
+                            ->orWhere('br_name', 'LIKE', "{$search}%")
+                            ->orWhere('br_province', 'LIKE', "{$search}%")
+                            ->orWhereHas('manager', function ($mq) use ($search) {
+                                $mq->where('us_fname', 'LIKE', "{$search}%")
+                                    ->orWhere('us_lname', 'LIKE', "{$search}%")
+                                    ->orWhereRaw("CONCAT(us_fname, ' ', us_lname) LIKE ?", ["{$search}%"]);
+                            });
+                    });
+                })
+                //ถ้าผู้ใช้งานเลือกจังหวัดที่ต้องการดู ระบบจะแสดงแค่จังหวัดนั้น
+                ->when($province, fn($query) => $query->where('br_province', $province));
+
+            // คำนวณยอดขายและดึงรูปล่าสุดของผู้ใช้งาน
+            $branches = $branchesQuery->wherein('br_id', $branchIds)->get()->map(function ($branch) {
+                $branch->total_sales = $branch->order()
+                    ->whereYear('created_at', now()->year)
+                    ->sum('od_amount');
+
+                $branch->latest_image = $branch->image->first();
+                return $branch;
+            });
+
+            // เรียงลำดับยอดขาย
+            $branches = $sort === 'asc'
+                ? $branches->sortBy('total_sales')->values()
+                : $branches->sortByDesc('total_sales')->values();
+
+            // นับจำนวนสาขาทั้งหมดจากการค้นหาหรือตัวกรองที่ผู้ใช้งานเลือก
+            $totalBranches = $branches->count();
+            $totalPages = ceil($totalBranches / $perPage);
+
+            // ตรวจสอบความถูกต้องของหน้า
+            if ($page < 1) {
+                $page = 1;
+            } else if ($page > $totalPages && $totalPages > 0) {
+                $page = $totalPages;
+            }
+
+            // แสดงเฉพาะข้อมูลในหน้าปัจจุบัน
+            $offset = ($page - 1) * $perPage;
+            $paginatedBranches = $branches->slice($offset, $perPage);
+
+            // กำหนดลำดับเลขหน้าของแต่ละสาขา
+            foreach ($paginatedBranches as $index => $branch) {
+                $branch->branch_number = $offset + $index + 1;
+            }
+
+            return view('branchMyMap', compact('paginatedBranches', 'sort', 'province', 'totalPages', 'page', 'search', 'userRole'));
+        }
+    }
+
+    public function index_team(Request $request)
+    {
+        $userRole = Auth::user()->us_role;
+        $currentUserId = Auth::user()->us_id;
+
+        // ดึงรายชื่อ user ที่มี us_head = คนที่ login
+        $userIdsOrder = User::where('us_head', $currentUserId)
+            ->where('us_role', '!=', 'Sales Supervisor')
+            ->whereNull('deleted_at')
+            ->pluck('us_id');
+
+        $branchIds = Branch::whereIn('br_us_id', $userIdsOrder)
+            ->whereNull('deleted_at')
+            ->pluck('br_id');
         // รับค่าจากผู้ใช้ใช้งาน
 
         $sort = $request->get('sort', 'desc'); // sort เรียงยอดขายจากมากไปน้อยหรือน้อยไปมาก โดยที่ค่าเริ่มต้นคือมากไปน้อย
@@ -55,7 +321,7 @@ class BranchController extends Controller
             ->when($province, fn($query) => $query->where('br_province', $province));
 
         // คำนวณยอดขายและดึงรูปล่าสุดของผู้ใช้งาน
-        $branches = $branchesQuery->get()->map(function ($branch) {
+        $branches = $branchesQuery->wherein('br_id', $branchIds)->get()->map(function ($branch) {
             $branch->total_sales = $branch->order()
                 ->whereYear('created_at', now()->year)
                 ->sum('od_amount');
@@ -89,7 +355,7 @@ class BranchController extends Controller
             $branch->branch_number = $offset + $index + 1;
         }
 
-        return view('branchMyMap', compact('paginatedBranches', 'sort', 'province', 'totalPages', 'page', 'search'));
+        return view('branchMyMap', compact('paginatedBranches', 'sort', 'province', 'totalPages', 'page', 'search', 'userRole'));
     }
 
     private array $thaiMonths = [

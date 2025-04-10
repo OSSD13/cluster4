@@ -33,9 +33,26 @@
 
             <!-- Filter & Profile -->
             <div class="flex items-center space-x-2">
-                <button class="w-9 h-9 flex items-center justify-center border rounded-md">
+                <button id="filterToggle" class="w-9 h-9 flex items-center justify-center border rounded-md">
                     <i class="fa-solid fa-filter text-gray-600"></i>
                 </button>
+                <div id="filterDropdown"
+                    class="absolute right-0 top-full mt-2 bg-white shadow-lg rounded-md p-3 hidden z-50 max-h-72 overflow-y-auto">
+                    @php
+                        $categories = collect($layerCategoryMap)->values()->unique();
+                    @endphp
+
+                    @foreach ($categories as $category)
+                        @php
+                            $inputId = 'filter-' . $loop->index;
+                        @endphp
+                        <div class="flex items-center space-x-2 mb-1">
+                            <input id="{{ $inputId }}" type="checkbox" class="category-filter w-5 h-5"
+                                value="{{ $category }}">
+                            <label for="{{ $inputId }}" class="text">{{ $category }}</label>
+                        </div>
+                    @endforeach
+                </div>
                 <button class="w-9 h-9 flex items-center justify-center border rounded-full">
                     @if (isset(Auth::user()->us_image))
                         <img src="{{ Auth::user()->us_image }}" alt="Profile" class="w-9 h-9 rounded-full">
@@ -79,4 +96,21 @@
             });
         </script>
     @endonce
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const toggleBtn = document.getElementById("filterToggle");
+            const dropdown = document.getElementById("filterDropdown");
+
+            toggleBtn?.addEventListener("click", () => {
+                dropdown?.classList.toggle("hidden");
+            });
+
+            // คลิกนอก dropdown แล้วปิด
+            document.addEventListener("click", function(e) {
+                if (!dropdown?.contains(e.target) && !toggleBtn?.contains(e.target)) {
+                    dropdown?.classList.add("hidden");
+                }
+            });
+        });
+    </script>
 </div>

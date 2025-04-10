@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Branch;
 use Livewire\Attributes\On;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Reactive;
 use Livewire\Component;
 
 class SearchBar extends Component
@@ -12,10 +13,12 @@ class SearchBar extends Component
 
     public $searchTerm = '';
     public $searchResults = [];
-
-    public function mount()
+    #[Reactive]
+    public $layerCategoryMap = [];
+    public function mount($layerCategoryMap)
     {
         $this->searchTerm = '';
+        $this->layerCategoryMap = $layerCategoryMap;
     }
 
     #[On('updateSearchTerm')]

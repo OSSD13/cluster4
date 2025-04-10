@@ -39,7 +39,6 @@ class MapLocation extends Component
 
 
     public $geoJsonBranch;
-    public $geoJsonInterest;
 
     #[On('generateCodeBranch')]
     public function generateCodeBranch()

@@ -108,29 +108,32 @@
 
         {{-- รายการที่ลงยอดขายแล้ว --}}
         <div id="done-list">
-            <div class="border border-gray-300 rounded-lg shadow-sm max-h-[325px] mx-4 overflow-y-auto">
+            <div class="border border-gray-300 rounded-lg shadow-sm max-h-[600px] mx-4 overflow-y-auto">
                 <ul>
                     @forelse ($branchesWithSales as $branch)
-                        <li class="px-4 py-4 flex items-center border-b border-gray-300">
-                            <div class="flex items-center w-1/2 space-x-4">
-                                <img src="{{ $branch->us_image }}" class="w-12 h-12 rounded-full ml-2" alt="User Image">
-                                <div class="flex flex-col justify-center">
-                                    <div class="flex items-baseline space-x-1 whitespace-nowrap">
+                        <a href="{{ route('order.detail', ['br_id' => $branch->br_id]) }}">
+                            <li class="px-4 py-4 flex items-center border-b border-gray-300">
+                                <div class="flex items-center w-1/2 space-x-4">
+                                    <img src="{{ $branch->us_image }}" class="w-12 h-12 rounded-full ml-2"
+                                        alt="User Image">
+                                    <div class="flex flex-col justify-center">
+                                        <div class="flex items-baseline space-x-1 whitespace-nowrap">
+                                            <span
+                                                class="text-sm font-semibold block truncate max-w-[70px] md:max-w-[200px] overflow-hidden whitespace-nowrap">สาขา
+                                                {{ $branch->br_name }}</span>
+                                            <span class="text-xs text-gray-500">({{ $branch->br_code }})</span>
+                                        </div>
                                         <span
-                                            class="text-sm font-semibold block truncate max-w-[70px] md:max-w-[200px] overflow-hidden whitespace-nowrap">สาขา
-                                            {{ $branch->br_name }}</span>
-                                        <span class="text-xs text-gray-500">({{ $branch->br_code }})</span>
+                                            class="text-xs text-gray-500 block truncate max-w-[160px] overflow-hidden whitespace-nowrap">{{ $branch->us_email }}</span>
                                     </div>
-                                    <span
-                                        class="text-xs text-gray-500 block truncate max-w-[160px] overflow-hidden whitespace-nowrap">{{ $branch->us_email }}</span>
                                 </div>
-                            </div>
-                            <div class="flex flex-col items-end w-1/2 justify-center">
-                                <span class="text-xs">ยอดขาย : {{ number_format($branch->total_sales, 2) }} ชิ้น</span>
-                                <span class="text-xs text-gray-500">อัพเดต :
-                                    {{ \Carbon\Carbon::parse($branch->latest_updated_at)->format('d/m/Y') }}</span>
-                            </div>
-                        </li>
+                                <div class="flex flex-col items-end w-1/2 justify-center">
+                                    <span class="text-xs">ยอดขาย : {{ number_format($branch->total_sales, 2) }} ชิ้น</span>
+                                    <span class="text-xs text-gray-500">อัพเดต :
+                                        {{ \Carbon\Carbon::parse($branch->latest_updated_at)->format('d/m/Y') }}</span>
+                                </div>
+                            </li>
+                        </a>
                     @empty
                         <li class="px-4 py-4 flex items-center">
                             <span class="text-sm">ไม่มีข้อมูลยอดขายในขณะนี้</span>
@@ -142,7 +145,7 @@
 
         {{-- รายการที่ยังไม่ได้ลงยอดขาย --}}
         <div id="notdone-list" class="hidden">
-            <div class="border border-gray-300 rounded-lg shadow-sm max-h-[325px] mx-4 overflow-y-auto">
+            <div class="border border-gray-300 rounded-lg shadow-sm max-h-[600px] mx-4 overflow-y-auto">
                 <ul>
                     @forelse ($branchesWithoutSales as $branch)
                         <a

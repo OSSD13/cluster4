@@ -10,10 +10,10 @@
         <div class="mb-4 px-4">
             <div class="text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
                 style="background-color: #4D55A0;">
-                <a href="/your-link" class="mx-3 text-white">
+                <a href="home" class="mx-3 text-white">
                     <i class="fa-solid fa-arrow-left fa-l"></i>
                 </a>
-                <span>สาขาของพนักงาน (ปี {{ now()->year + 543 }})</span>
+                <span>สาขาของฉัน (ปี {{ now()->year + 543 }})</span>
             </div>
         </div>
 
@@ -43,7 +43,8 @@
                 <select name="province" id="provinceSelect" onchange="this.form.submit()"
                     class="block w-full rounded-md border-2 border-gray-300 p-2 text-gray-400 focus:outline-indigo-400">
                     <option value="">เลือกจังหวัด</option>
-                    <option value="กรุงเทพมหานคร" {{ request('province') == 'กรุงเทพมหานคร' ? 'selected' : '' }}>กรุงเทพมหานคร</option>
+                    <option value="กรุงเทพมหานคร" {{ request('province') == 'กรุงเทพมหานคร' ? 'selected' : '' }}>
+                        กรุงเทพมหานคร</option>
                     <option value="เชียงใหม่" {{ request('province') == 'เชียงใหม่' ? 'selected' : '' }}>เชียงใหม่</option>
                     <option value="ขอนแก่น" {{ request('province') == 'ขอนแก่น' ? 'selected' : '' }}>ขอนแก่น</option>
                     <option value="นครราชสีมา" {{ request('province') == 'นครราชสีมา' ? 'selected' : '' }}>นครราชสีมา
@@ -107,7 +108,7 @@
                             <p class="font-medium  text-blue-800"> ยอดรวม {{ number_format($branch->total_sales) }} ชิ้น
                             </p>
                         </div>
-                        <a href="{{ route('branchMyMap', $branch->br_id) }}"
+                        <a href="{{ route('branchDetail', $branch->br_id) }}"
                             class="font-semibold text-sm text-blue-800">ดูเพิ่มเติม</a>
                     </div>
                 </div>

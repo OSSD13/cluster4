@@ -4,12 +4,13 @@
     <div class="pt-16 bg-white-100 w-full">
         {{-- ปุ่มย้อนกลับและหัวข้อ --}}
         <div class="mb-4 px-4">
-            <a href="{{ url()->previous() }}"
-                class="text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
+            <div class="text-white border-[#4D55A0] text-2xl font-extrabold py-3 rounded-2xl flex items-center w-full"
                 style="background-color: #4D55A0;">
-                <i class="fa-solid fa-arrow-left mx-3 fa-l"></i>
+                <a href="{{ url()->previous() }}">
+                    <i class="fa-solid fa-arrow-left mx-3 fa-l"></i>
+                </a>
                 แก้ไขข้อมูล
-            </a>
+            </div>
         </div>
 
         {{-- ส่วนเนื้อหา --}}
@@ -40,7 +41,7 @@
                     <label for="od_amount" class="block mb-1 text-sm font-medium">ยอดขาย</label>
                     <input type="text" id="od_amount" name="od_amount" value="{{ old('od_amount', $order->od_amount) }}"
                         pattern="[0-9]+" inputmode="numeric"
-                        class="border border-gray-300 px-2 py-1 rounded w-full text-sm" />
+                        class="border text-center border-gray-300 px-2 py-1 rounded w-full text-sm" />
                 </div>
 
                 {{-- เดือน ปี สาขา พนักงาน (ต้องมีในฟอร์มด้วย ไม่งั้นจะ error ที่ controller) --}}
@@ -55,14 +56,14 @@
                     {{-- ปุ่มยกเลิก --}}
                     <div class="flex justify-between">
                         <a href="{{ url()->previous() }}"
-                        class="w-[120px] text-center bg-white text-black border border-black px-6 py-2 rounded-lg font-bold text-base">
-                         ยกเลิก
-                     </a>
-                     {{-- ปุ่มบันทึก --}}
-                     <button type="submit"
-                         class="w-[120px] bg-[#4D55A0] text-white border border-transparent px-6 py-2 rounded-lg font-bold text-base">
-                         บันทึก
-                     </button>
+                            class="w-[120px] text-center bg-white text-black border border-black px-6 py-2 rounded-lg font-bold text-base">
+                            ยกเลิก
+                        </a>
+                        {{-- ปุ่มบันทึก --}}
+                        <button type="submit"
+                            class="w-[120px] bg-[#4D55A0] text-white border border-transparent px-6 py-2 rounded-lg font-bold text-base">
+                            บันทึก
+                        </button>
                     </div>
                 </div>
 

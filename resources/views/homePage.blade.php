@@ -637,7 +637,7 @@
                         <div class="p-4 rounded-full">
                             <i class="fa-solid fa-warehouse fa-2xl" style="color: #4D55A0;"></i>
                         </div>
-                        <a href="#" class="col">
+                        <a href="{{ route('branch-Sales') }}" class="col">
                             <button class="btn btn-warning text-[#4D55A0] text-sm">ดูเพิ่มเติม</button>
                         </a>
                     </div>

@@ -82,8 +82,8 @@
                 const saveButton = document.getElementById('saveButton');
                 saveButton.disabled = true;
 
-                const orderAlert = './public/alert-icon/OrderAlert.png';
-                const successAlert = './public/alert-icon/SuccessAlert.png';
+                const orderAlert = '/public/alert-icon/OrderAlert.png';
+                const successAlert = '/public/alert-icon/SuccessAlert.png';
 
                 Swal.fire({
                     title: 'ยืนยันการเพิ่มยอดขาย',

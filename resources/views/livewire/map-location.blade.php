@@ -5,7 +5,25 @@
 --}}
 
 <div>
-    <livewire:search-bar />
+    @php
+        $layerCategoryMap = [
+            '11changwatcenterv2' => 'สถานที่ราชการ',
+            '12amphoecenterv2' => 'สถานที่ราชการ',
+            '13tesaban' => 'สถานที่ราชการ',
+            '21school' => 'สถานศึกษา',
+            '22collegeanduniversity' => 'สถานศึกษา',
+            '31hospital' => 'โรงพยาบาล',
+            '51policecenter' => 'สถานที่ราชการ',
+            '52policestop' => 'สถานที่ราชการ',
+            '53courtcenter' => 'สถานที่ราชการ',
+            '54jail' => 'เรือนจำ',
+            '61buildinglandmark' => 'สถานท่องเที่ยว',
+            '62bank' => 'ธนาคาร',
+            '63hotel' => 'โรงแรม',
+            '71departmentoflands' => 'สถานที่ราชการ',
+            '72ruralroadcenter' => 'สถานที่ราชการ',
+        ];
+    @endphp <livewire:search-bar :layer-category-map="$layerCategoryMap" />
     <div id='map' wire:ignore style="width: 100vw; min-height: 100dvh"></div>
     {{-- add branch form --}}
     <div wire:ignore.self id="locationForm"
@@ -1377,6 +1395,172 @@
                 });
             }
         }
+
+        map.on('load', () => {
+            const layers = [
+                '11changwatcenterv2',
+                '12amphoecenterv2',
+                '13tesaban',
+                '21school',
+                '22collegeanduniversity',
+                '31hospital',
+                '51policecenter',
+                '52policestop',
+                '53courtcenter',
+                '54jail',
+                '61buildinglandmark',
+                '62bank',
+                '63hotel',
+                '71departmentoflands',
+                '72ruralroadcenter'
+            ];
+
+            const layerCategoryMap = {
+                '11changwatcenterv2': 'สถานที่ราชการ',
+                '12amphoecenterv2': 'สถานที่ราชการ',
+                '13tesaban': 'สถานที่ราชการ',
+                '21school': 'สถานศึกษา',
+                '22collegeanduniversity': 'สถานศึกษา',
+                '31hospital': 'โรงพยาบาล',
+                '43temple': 'สถานที่ทางศาสนา',
+                '51policecenter': 'สถานที่ราชการ',
+                '52policestop': 'สถานที่ราชการ',
+                '53courtcenter': 'สถานที่ราชการ',
+                '54jail': 'เรือนจำ',
+                '61buildinglandmark': 'สถานท่องเที่ยว',
+                '62bank': 'ธนาคาร',
+                '63hotel': 'โรงแรม',
+                '71departmentoflands': 'สถานที่ราชการ',
+                '72ruralroadcenter': 'สถานที่ราชการ',
+            };
+
+            const categoryConfig = {
+                'เรือนจำ': {
+                    color: 'FF6347',
+                    emoji: 'prison'
+                },
+                'สถานท่องเที่ยว': {
+                    color: '32CD32',
+                    emoji: 'landmark'
+                },
+                'สถานที่ราชการ': {
+                    color: '1E90FF',
+                    emoji: 'town-hall'
+                },
+                'สถานศึกษา': {
+                    color: '1E2455',
+                    emoji: 'college'
+                },
+                'โรงพยาบาล': {
+                    color: 'FF69B4',
+                    emoji: 'hospital'
+                },
+                'สถานที่ทางศาสนา': {
+                    color: 'FFD700',
+                    emoji: 'religious-christian'
+                },
+                'ธนาคาร': {
+                    color: '8A2BE2',
+                    emoji: 'bank'
+                },
+                'โรงแรม': {
+                    color: 'FF1493',
+                    emoji: 'building'
+                },
+            };
+
+            // Helper function
+            function getCategory(layerId) {
+                return layerCategoryMap[layerId] || 'ธรรมชาติ';
+            }
+
+            function getIconName(layerId) {
+                const category = getCategory(layerId);
+                return categoryConfig[category]?.emoji || 'marker';
+            }
+
+            function getColorHex(layerId) {
+                const category = getCategory(layerId);
+                return categoryConfig[category]?.color || '999999';
+            }
+
+            async function initLayers(layerList) {
+                for (const layerId of layerList) {
+                    const category = getCategory(layerId);
+                    const icon = getIconName(layerId);
+                    const color = getColorHex(layerId);
+                    const imageName = `${layerId}-icon`;
+
+                    const imageUrl =
+                        `https://api.mapbox.com/v4/marker/pin-m-${icon}+${color}.png?access_token=${mapboxgl.accessToken}`;
+                    const image = await loadImageAsync(imageUrl);
+
+                    if (!map.hasImage(imageName)) {
+                        map.addImage(imageName, image);
+                    }
+
+                    map.addSource(layerId, {
+                        type: 'vector',
+                        url: 'mapbox://pktonnam.1p9c1btr'
+                    });
+
+                    map.addLayer({
+                        id: layerId,
+                        type: 'symbol',
+                        source: layerId,
+                        'source-layer': layerId,
+                        layout: {
+                            'icon-image': imageName,
+                            'icon-size': 1,
+                            'icon-allow-overlap': true,
+                            'text-field': ['get', 'name'],
+                            'text-size': 11,
+                            'text-offset': [0, 0.5],
+                        }
+                    });
+
+                    map.setLayoutProperty(layerId, 'visibility', 'none');
+                }
+            }
+
+            // Load image async helper
+            function loadImageAsync(url) {
+                return new Promise((resolve, reject) => {
+                    map.loadImage(url, (error, image) => {
+                        if (error) reject(error);
+                        else resolve(image);
+                    });
+                });
+            }
+
+            // Start loading all layers
+            initLayers(layers);
+
+            const checkboxes = document.querySelectorAll('.category-filter');
+
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', () => {
+                    const selectedCategories = Array.from(checkboxes)
+                        .filter(cb => cb.checked)
+                        .map(cb => cb.value);
+
+                    const layerCategoryMap = @json($layerCategoryMap);
+
+                    for (const [layerId, category] of Object.entries(
+                            layerCategoryMap)) {
+                        const isVisible = selectedCategories.includes(category);
+                        const visibility = isVisible ? 'visible' : 'none';
+
+                        if (map.getLayer(layerId)) {
+                            map.setLayoutProperty(layerId, 'visibility', visibility);
+                        }
+                    }
+                });
+            });
+        });
+
+
+
 
         map.on('load', () => {
             _loadBranchs({!! $geoJsonBranch !!})

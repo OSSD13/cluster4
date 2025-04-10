@@ -81,6 +81,7 @@
     {{ $slot }}
 
     @livewireScripts
+    @stack('scripts')
     {{-- <script>
         Livewire.onPageExpired((response, message) => {})
     </script> --}}

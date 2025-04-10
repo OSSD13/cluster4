@@ -45,12 +45,13 @@ class OrderController extends Controller
 
     public function editOrder($od_id)
     {
+        $label = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+        $order = Order::find($od_id);
         $order = Order::with('branch')->find($od_id);
 
         if (!$order) {
-            return redirect()->route('order');
+            return redirect()->route('edit.order', ['od_id' => $od_id]);
         }
-
         $users = User::all();
         return view('editOrder', compact('order', 'users'));
     }
